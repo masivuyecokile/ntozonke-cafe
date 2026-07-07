@@ -1,0 +1,8 @@
+# Sensitive files
+.env
+.env.local
+*.key
+*.pem
+config/database.yml
+secrets/
+private/
