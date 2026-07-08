@@ -5,11 +5,16 @@ session_start();
 require_once __DIR__ . '/../app/config/config.php';
 require_once __DIR__ . '/../app/config/database.php';
 require_once __DIR__ . '/../app/helpers/response.php';
+
 require_once __DIR__ . '/../app/controllers/AuthController.php';
+require_once __DIR__ . '/../app/controllers/DashboardController.php';
+require_once __DIR__ . '/../app/controllers/SessionController.php';
 
 $route = $_GET['route'] ?? 'login';
 
 $authController = new AuthController();
+$dashboardController = new DashboardController();
+$sessionController = new SessionController();
 
 $publicRoutes = [
     'login',
@@ -35,8 +40,16 @@ switch ($route) {
         break;
 
     case 'dashboard':
-        require_once __DIR__ . '/../app/views/dashboard/index.php';
+        $dashboardController->index();
         break;
+
+    case 'sessions.start':
+    $sessionController->startAjax();
+    break;
+
+    case 'sessions.end':
+    $sessionController->endAjax();
+    break;
 
     default:
         header('Location: ' . BASE_URL . '/index.php?route=login');
