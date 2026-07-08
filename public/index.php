@@ -44,12 +44,20 @@ switch ($route) {
         break;
 
     case 'sessions.start':
-    $sessionController->startAjax();
-    break;
+        $sessionController->startAjax();
+        break;
 
     case 'sessions.end':
-    $sessionController->endAjax();
-    break;
+        $sessionController->endAjax();
+        break;
+
+    case 'sessions.extend':
+        $sessionController->extendAjax();
+        break;
+
+    case 'sessions.expire':
+        $sessionController->expireAjax();
+        break;
 
     default:
         header('Location: ' . BASE_URL . '/index.php?route=login');

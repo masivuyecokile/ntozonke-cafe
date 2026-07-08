@@ -141,7 +141,10 @@
                             <h6>Active Session</h6>
                             <p>
                                 <?= htmlspecialchars($activeSession->customer_name ?? 'Customer'); ?><br>
-                                Remaining: <strong><?= $remainingText; ?></strong><br>
+                                Remaining: <strong class="js-session-countdown"
+                                data-end-timestamp="<?= $activeSession ? strtotime($activeSession->end_time) : 0; ?>">
+                                <?= $remainingText; ?>
+                                </strong><br>
                                 Amount: R<?= number_format((float)($activeSession->amount_due ?? 0), 2); ?>
                             </p>
 
@@ -176,17 +179,19 @@
                             </button>
 
                         <?php elseif ($pc->status === 'active'): ?>
-
-                            <button 
-                                type="button"
-                                class="btn btn-outline-success btn-sm w-50">
+                            <button type="button"
+                                class="btn btn-outline-success btn-sm w-50 js-extend-session"
+                                data-session-id="<?= $activeSession->id ?? 0; ?>"
+                                data-pc-name="<?= htmlspecialchars($pc->pc_name); ?>">
                                 <i class="bi bi-plus-circle me-1"></i>
                                 Extend
                             </button>
 
                             <button 
                                 type="button"
-                                class="btn btn-outline-danger btn-sm w-50">
+                                class="btn btn-outline-danger btn-sm w-50 js-end-session"
+                                data-session-id="<?= $activeSession->id ?? 0; ?>"
+                                data-pc-name="<?= htmlspecialchars($pc->pc_name); ?>">
                                 <i class="bi bi-stop-circle me-1"></i>
                                 End
                             </button>
@@ -285,4 +290,77 @@
     </div>
 </div>
 
+<div class="modal fade" id="extendSessionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form 
+            id="extendSessionForm" 
+            class="modal-content" 
+            action="<?= BASE_URL; ?>/index.php?route=sessions.extend" 
+            method="POST">
+
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken); ?>">
+            <input type="hidden" name="session_id" id="extendSessionId">
+
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title">Extend Session</h5>
+                    <small class="text-muted" id="extendPcName">Selected PC</small>
+                </div>
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="mb-3">
+                    <label class="form-label">Select Extra Time</label>
+
+                    <select name="package_id" id="extendPackageSelect" class="form-select" required>
+                        <option value="">Choose extension</option>
+
+                        <?php foreach ($packages as $package): ?>
+                            <option 
+                                value="<?= $package->id; ?>"
+                                data-minutes="<?= $package->minutes; ?>"
+                                data-price="<?= $package->price; ?>">
+                                +<?= htmlspecialchars($package->package_name); ?> - R<?= number_format((float)$package->price, 2); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="package-summary d-none" id="extendPackageSummary">
+                    <div>
+                        <span>Extra Time</span>
+                        <strong id="extendSummaryMinutes">0 minutes</strong>
+                    </div>
+
+                    <div>
+                        <span>Extra Cost</span>
+                        <strong id="extendSummaryPrice">R0.00</strong>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                    Cancel
+                </button>
+
+                <button type="submit" class="btn btn-success" id="extendSessionBtn">
+                    <i class="bi bi-plus-circle me-1"></i>
+                    Extend Session
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+<script>
+    window.NTOZONKE = {
+        baseUrl: "<?= BASE_URL; ?>",
+        csrfToken: "<?= htmlspecialchars($csrfToken); ?>"
+    };
+</script>
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>
