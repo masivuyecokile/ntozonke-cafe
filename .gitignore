@@ -6,3 +6,4 @@
 config/database.yml
 secrets/
 private/
+.vscode/launch.json
