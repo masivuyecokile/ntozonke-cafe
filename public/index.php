@@ -66,6 +66,18 @@ switch ($route) {
         $dashboardController->index();
         break;
 
+    case 'pc-stations.store':
+    $pcStationController->storeAjax();
+    break;
+
+case 'pc-stations.update':
+    $pcStationController->updateAjax();
+    break;
+
+case 'pc-stations.status':
+    $pcStationController->statusAjax();
+    break;
+
     case 'pc-stations':
         $pcStationController->index();
         break;

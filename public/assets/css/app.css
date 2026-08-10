@@ -1031,3 +1031,37 @@ a {
     background: rgba(220, 53, 69, 0.12);
     color: #dc3545;
 }
+
+.pc-card {
+    overflow: hidden;
+}
+
+.pc-card-body {
+    overflow: hidden;
+}
+
+.pc-meta {
+    word-break: break-word;
+}
+
+.pc-status-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.pc-status-actions .btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+.pc-card .d-grid {
+    overflow: hidden;
+}
+
+.pc-card .btn {
+    min-height: 36px;
+}

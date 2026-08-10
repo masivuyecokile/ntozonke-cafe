@@ -1190,4 +1190,256 @@ if (salesPeriod) {
     salesPeriod.addEventListener('change', toggleSalesCustomDates);
     toggleSalesCustomDates();
 }
+
+/**
+ * PC Stations Management
+ */
+const addPcForm = document.getElementById('addPcForm');
+const savePcBtn = document.getElementById('savePcBtn');
+
+if (addPcForm && savePcBtn) {
+    addPcForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const originalText = savePcBtn.innerHTML;
+        const formData = new FormData(addPcForm);
+
+        savePcBtn.disabled = true;
+        savePcBtn.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            Saving...
+        `;
+
+        try {
+            const response = await fetch(addPcForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            let data;
+
+            try {
+                data = await parseJsonResponse(response, 'ADD PC RESPONSE');
+            } catch (error) {
+                showServerJsonError(savePcBtn, originalText);
+                return;
+            }
+
+            if (!data.success) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Could Not Add PC',
+                    text: data.message || 'Something went wrong.',
+                    confirmButtonColor: '#00a651'
+                });
+
+                savePcBtn.disabled = false;
+                savePcBtn.innerHTML = originalText;
+                return;
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'PC Added',
+                text: data.message,
+                timer: 1200,
+                showConfirmButton: false
+            });
+
+            setTimeout(function () {
+                window.location.reload();
+            }, 1200);
+
+        } catch (error) {
+            console.error('Add PC error:', error);
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Connection Error',
+                text: 'Could not connect to the local server.',
+                confirmButtonColor: '#00a651'
+            });
+
+            savePcBtn.disabled = false;
+            savePcBtn.innerHTML = originalText;
+        }
+    });
+}
+
+const editPcButtons = document.querySelectorAll('.js-edit-pc');
+const editPcForm = document.getElementById('editPcForm');
+const updatePcBtn = document.getElementById('updatePcBtn');
+
+const editPcId = document.getElementById('editPcId');
+const editPcName = document.getElementById('editPcName');
+const editIpAddress = document.getElementById('editIpAddress');
+const editMacAddress = document.getElementById('editMacAddress');
+
+editPcButtons.forEach(function (button) {
+    button.addEventListener('click', function () {
+        if (!editPcId || !editPcName || !editIpAddress || !editMacAddress) return;
+
+        editPcId.value = button.dataset.pcId || '';
+        editPcName.value = button.dataset.pcName || '';
+        editIpAddress.value = button.dataset.ipAddress || '';
+        editMacAddress.value = button.dataset.macAddress || '';
+    });
+});
+
+if (editPcForm && updatePcBtn) {
+    editPcForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const originalText = updatePcBtn.innerHTML;
+        const formData = new FormData(editPcForm);
+
+        updatePcBtn.disabled = true;
+        updatePcBtn.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            Updating...
+        `;
+
+        try {
+            const response = await fetch(editPcForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            let data;
+
+            try {
+                data = await parseJsonResponse(response, 'UPDATE PC RESPONSE');
+            } catch (error) {
+                showServerJsonError(updatePcBtn, originalText);
+                return;
+            }
+
+            if (!data.success) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Could Not Update PC',
+                    text: data.message || 'Something went wrong.',
+                    confirmButtonColor: '#00a651'
+                });
+
+                updatePcBtn.disabled = false;
+                updatePcBtn.innerHTML = originalText;
+                return;
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'PC Updated',
+                text: data.message,
+                timer: 1200,
+                showConfirmButton: false
+            });
+
+            setTimeout(function () {
+                window.location.reload();
+            }, 1200);
+
+        } catch (error) {
+            console.error('Update PC error:', error);
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Connection Error',
+                text: 'Could not connect to the local server.',
+                confirmButtonColor: '#00a651'
+            });
+
+            updatePcBtn.disabled = false;
+            updatePcBtn.innerHTML = originalText;
+        }
+    });
+}
+
+const pcStatusButtons = document.querySelectorAll('.js-pc-status');
+
+pcStatusButtons.forEach(function (button) {
+    button.addEventListener('click', async function () {
+        const pcId = button.dataset.pcId;
+        const status = button.dataset.status;
+
+        if (!pcId || !status) return;
+
+        const confirm = await Swal.fire({
+            icon: 'question',
+            title: 'Change PC Status?',
+            text: `Set this PC to ${status.replace('_', ' ')}?`,
+            showCancelButton: true,
+            confirmButtonText: 'Yes, update',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#00a651'
+        });
+
+        if (!confirm.isConfirmed) return;
+
+        const formData = new FormData();
+        formData.append('csrf_token', getCsrfToken());
+        formData.append('pc_id', pcId);
+        formData.append('status', status);
+
+        try {
+            const response = await fetch(`${getBaseUrl()}/index.php?route=pc-stations.status`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            let data;
+
+            try {
+                data = await parseJsonResponse(response, 'PC STATUS RESPONSE');
+            } catch (error) {
+                showServerJsonError();
+                return;
+            }
+
+            if (!data.success) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Could Not Update Status',
+                    text: data.message || 'Something went wrong.',
+                    confirmButtonColor: '#00a651'
+                });
+                return;
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Status Updated',
+                text: data.message,
+                timer: 1200,
+                showConfirmButton: false
+            });
+
+            setTimeout(function () {
+                window.location.reload();
+            }, 1200);
+
+        } catch (error) {
+            console.error('PC status error:', error);
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Connection Error',
+                text: 'Could not connect to the local server.',
+                confirmButtonColor: '#00a651'
+            });
+        }
+    });
+});
 });
