@@ -1169,4 +1169,25 @@ if (expensePeriod) {
     expensePeriod.addEventListener('change', toggleExpenseCustomDates);
     toggleExpenseCustomDates();
 }
+
+/**
+ * Sales Filter
+ */
+const salesPeriod = document.getElementById('salesPeriod');
+const salesStartDate = document.getElementById('salesStartDate');
+const salesEndDate = document.getElementById('salesEndDate');
+
+function toggleSalesCustomDates() {
+    if (!salesPeriod || !salesStartDate || !salesEndDate) return;
+
+    const isCustom = salesPeriod.value === 'custom';
+
+    salesStartDate.style.display = isCustom ? 'block' : 'none';
+    salesEndDate.style.display = isCustom ? 'block' : 'none';
+}
+
+if (salesPeriod) {
+    salesPeriod.addEventListener('change', toggleSalesCustomDates);
+    toggleSalesCustomDates();
+}
 });

@@ -73,6 +73,11 @@ class Sale
 
     public function getByDate(string $date): array
     {
+        return $this->getByRange($date, $date);
+    }
+
+    public function getByRange(string $startDate, string $endDate): array
+    {
         $stmt = $this->db->prepare("
             SELECT
                 s.*,
@@ -84,12 +89,13 @@ class Sale
             LEFT JOIN pcs p ON p.id = cs.pc_id
             LEFT JOIN print_jobs pj ON pj.id = s.print_job_id
             LEFT JOIN users u ON u.id = s.created_by
-            WHERE DATE(s.created_at) = :sale_date
-            ORDER BY s.id DESC
+            WHERE DATE(s.created_at) BETWEEN :start_date AND :end_date
+            ORDER BY s.created_at DESC, s.id DESC
         ");
 
         $stmt->execute([
-            ':sale_date' => $date
+            ':start_date' => $startDate,
+            ':end_date' => $endDate
         ]);
 
         return $stmt->fetchAll();

@@ -1016,3 +1016,18 @@ a {
         width: 100%;
     }
 }
+
+.expense-stat-card i {
+    background: rgba(220, 53, 69, 0.12);
+    color: #dc3545;
+}
+
+.profit-stat-card i {
+    background: rgba(0, 166, 81, 0.12);
+    color: var(--brand-green);
+}
+
+.profit-stat-card.loss i {
+    background: rgba(220, 53, 69, 0.12);
+    color: #dc3545;
+}

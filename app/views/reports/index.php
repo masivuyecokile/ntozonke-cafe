@@ -1,6 +1,12 @@
 <?php require_once __DIR__ . '/../layouts/header.php'; ?>
 <?php require_once __DIR__ . '/../layouts/sidebar.php'; ?>
-
+<?php
+$rangeQuery = http_build_query([
+    'period' => $period,
+    'start_date' => $startDate,
+    'end_date' => $endDate
+]);
+?>
 <main class="main-content">
 
     <div class="topbar">
@@ -166,7 +172,7 @@
 
     <div class="row g-3">
         <div class="col-md-4">
-            <a href="<?= BASE_URL; ?>/index.php?route=sales&date=<?= htmlspecialchars($startDate); ?>" class="report-action-card">
+            <a href="<?= BASE_URL; ?>/index.php?route=sales&<?= htmlspecialchars($rangeQuery); ?>" class="report-action-card">
                 <i class="bi bi-cash-stack"></i>
                 <div>
                     <strong>View Sales</strong>
@@ -176,7 +182,7 @@
         </div>
 
         <div class="col-md-4">
-            <a href="<?= BASE_URL; ?>/index.php?route=expenses&date=<?= htmlspecialchars($startDate); ?>" class="report-action-card">
+            <a href="<?= BASE_URL; ?>/index.php?route=expenses&<?= htmlspecialchars($rangeQuery); ?>" class="report-action-card">
                 <i class="bi bi-journal-minus"></i>
                 <div>
                     <strong>View Expenses</strong>

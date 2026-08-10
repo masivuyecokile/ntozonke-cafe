@@ -28,6 +28,53 @@
     </div>
 </div>
 
+<div class="section-heading mt-4">
+    <h5>Today’s Business Summary</h5>
+    <p>Live income, expense, and profit overview for today.</p>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card sales-card">
+            <div>
+                <span>Today Revenue</span>
+                <h3>R<?= number_format($todayRevenue, 2); ?></h3>
+            </div>
+            <i class="bi bi-wallet2"></i>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="stat-card expense-stat-card">
+            <div>
+                <span>Today Expenses</span>
+                <h3>R<?= number_format($todayExpenses, 2); ?></h3>
+            </div>
+            <i class="bi bi-journal-minus"></i>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="stat-card profit-stat-card <?= $todayNetProfit < 0 ? 'loss' : ''; ?>">
+            <div>
+                <span>Today Net Profit</span>
+                <h3>R<?= number_format($todayNetProfit, 2); ?></h3>
+            </div>
+            <i class="bi <?= $todayNetProfit < 0 ? 'bi-arrow-down-circle' : 'bi-arrow-up-circle'; ?>"></i>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div>
+                <span>Pending Print Jobs</span>
+                <h3><?= $pendingPrintJobs; ?></h3>
+            </div>
+            <i class="bi bi-printer-fill"></i>
+        </div>
+    </div>
+</div>
+
 <div class="row g-3 mt-3">
     <div class="col-md-3">
         <div class="stat-card">
