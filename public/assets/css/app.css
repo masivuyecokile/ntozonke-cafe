@@ -373,3 +373,118 @@ body {
         gap: 12px;
     }
 }
+
+.print-table thead th {
+    background: #f6f8f7;
+    color: #475047;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid #e8ece9;
+}
+
+.print-table tbody td {
+    padding: 16px;
+}
+.sidebar-nav a {
+    position: relative;
+}
+
+.sidebar-badge {
+    margin-left: auto;
+    background: #dc3545;
+    color: #ffffff;
+    font-size: 11px;
+    min-width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.sales-card i {
+    background: rgba(0, 166, 81, 0.12);
+}
+
+.table thead th {
+    background: #f6f8f7;
+    color: #475047;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid #e8ece9;
+}
+
+.table tbody td {
+    padding: 14px 16px;
+}
+
+.payment-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 11px 0;
+    border-bottom: 1px solid #edf0ee;
+}
+
+.payment-row span {
+    color: var(--brand-muted);
+    font-size: 14px;
+}
+
+.payment-row strong {
+    font-size: 15px;
+}
+
+.payment-row.total {
+    border-bottom: 0;
+    padding-top: 4px;
+}
+
+.payment-row.total span,
+.payment-row.total strong {
+    color: var(--brand-green-dark);
+    font-weight: 700;
+}
+
+.mini-summary-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 18px 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mini-summary-card span {
+    color: var(--brand-muted);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.mini-summary-card strong {
+    color: var(--brand-green-dark);
+}
+
+.service-total-box {
+    background: #f4fbf6;
+    border: 1px solid rgba(0, 166, 81, 0.15);
+    border-radius: 18px;
+    padding: 18px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.service-total-box span {
+    color: var(--brand-muted);
+    font-weight: 600;
+}
+
+.service-total-box strong {
+    color: var(--brand-green-dark);
+    font-size: 24px;
+}
