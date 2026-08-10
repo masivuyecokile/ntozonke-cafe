@@ -10,20 +10,41 @@
         </div>
 
         <div class="topbar-actions">
-            <form method="GET" action="<?= BASE_URL; ?>/index.php" class="d-flex gap-2">
-                <input type="hidden" name="route" value="expenses">
+            <form method="GET" action="<?= BASE_URL; ?>/index.php" class="report-filter-form">
+    <input type="hidden" name="route" value="expenses">
 
-                <input 
-                    type="date" 
-                    name="date" 
-                    class="form-control form-control-sm" 
-                    value="<?= htmlspecialchars($selectedDate); ?>">
+    <select name="period" class="form-select form-select-sm" id="expensePeriod">
+        <option value="today" <?= $period === 'today' ? 'selected' : ''; ?>>Today</option>
+        <option value="yesterday" <?= $period === 'yesterday' ? 'selected' : ''; ?>>Yesterday</option>
+        <option value="this_week" <?= $period === 'this_week' ? 'selected' : ''; ?>>This Week</option>
+        <option value="last_week" <?= $period === 'last_week' ? 'selected' : ''; ?>>Last Week</option>
+        <option value="this_month" <?= $period === 'this_month' ? 'selected' : ''; ?>>This Month</option>
+        <option value="last_month" <?= $period === 'last_month' ? 'selected' : ''; ?>>Last Month</option>
+        <option value="this_quarter" <?= $period === 'this_quarter' ? 'selected' : ''; ?>>This Quarter</option>
+        <option value="last_quarter" <?= $period === 'last_quarter' ? 'selected' : ''; ?>>Last Quarter</option>
+        <option value="this_year" <?= $period === 'this_year' ? 'selected' : ''; ?>>This Year</option>
+        <option value="custom" <?= $period === 'custom' ? 'selected' : ''; ?>>Custom Range</option>
+    </select>
 
-                <button class="btn btn-success btn-sm">
-                    <i class="bi bi-search me-1"></i>
-                    Filter
-                </button>
-            </form>
+    <input 
+        type="date" 
+        name="start_date" 
+        id="expenseStartDate"
+        class="form-control form-control-sm"
+        value="<?= htmlspecialchars($startDate); ?>">
+
+    <input 
+        type="date" 
+        name="end_date" 
+        id="expenseEndDate"
+        class="form-control form-control-sm"
+        value="<?= htmlspecialchars($endDate); ?>">
+
+    <button class="btn btn-success btn-sm">
+        <i class="bi bi-search me-1"></i>
+        Apply
+    </button>
+</form>
 
             <a href="<?= BASE_URL; ?>/index.php?route=dashboard" class="btn btn-outline-dark btn-sm">
                 <i class="bi bi-grid me-1"></i>
@@ -76,7 +97,7 @@
                                 type="date" 
                                 name="expense_date" 
                                 class="form-control"
-                                value="<?= htmlspecialchars($selectedDate); ?>"
+                                value="<?= htmlspecialchars(date('Y-m-d')); ?>"
                                 required>
                         </div>
 
@@ -140,7 +161,12 @@
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-header bg-white border-0 pt-4 px-4">
                     <h6 class="mb-0 fw-bold">Expense List</h6>
-                    <small class="text-muted">Showing expenses for <?= date('d M Y', strtotime($selectedDate)); ?>.</small>
+                    <small class="text-muted">
+    <?= htmlspecialchars($periodLabel); ?>:
+    <?= date('d M Y', strtotime($startDate)); ?>
+    to
+    <?= date('d M Y', strtotime($endDate)); ?>
+</small>
                 </div>
 
                 <div class="card-body p-0">

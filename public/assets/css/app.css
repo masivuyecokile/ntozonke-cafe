@@ -991,3 +991,28 @@ a {
     transform: translateY(-2px);
     color: #101820;
 }
+
+.report-filter-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.report-filter-form .form-select,
+.report-filter-form .form-control {
+    width: auto;
+    min-width: 150px;
+}
+
+@media (max-width: 768px) {
+    .report-filter-form {
+        width: 100%;
+    }
+
+    .report-filter-form .form-select,
+    .report-filter-form .form-control,
+    .report-filter-form .btn {
+        width: 100%;
+    }
+}

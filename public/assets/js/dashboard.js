@@ -1127,4 +1127,46 @@ if (expenseForm && saveExpenseBtn) {
         }
     });
 }
+
+/**
+ * Reports Filter
+ */
+const reportPeriod = document.getElementById('reportPeriod');
+const reportStartDate = document.getElementById('reportStartDate');
+const reportEndDate = document.getElementById('reportEndDate');
+
+function toggleReportCustomDates() {
+    if (!reportPeriod || !reportStartDate || !reportEndDate) return;
+
+    const isCustom = reportPeriod.value === 'custom';
+
+    reportStartDate.style.display = isCustom ? 'block' : 'none';
+    reportEndDate.style.display = isCustom ? 'block' : 'none';
+}
+
+if (reportPeriod) {
+    reportPeriod.addEventListener('change', toggleReportCustomDates);
+    toggleReportCustomDates();
+}
+
+/**
+ * Expenses Filter
+ */
+const expensePeriod = document.getElementById('expensePeriod');
+const expenseStartDate = document.getElementById('expenseStartDate');
+const expenseEndDate = document.getElementById('expenseEndDate');
+
+function toggleExpenseCustomDates() {
+    if (!expensePeriod || !expenseStartDate || !expenseEndDate) return;
+
+    const isCustom = expensePeriod.value === 'custom';
+
+    expenseStartDate.style.display = isCustom ? 'block' : 'none';
+    expenseEndDate.style.display = isCustom ? 'block' : 'none';
+}
+
+if (expensePeriod) {
+    expensePeriod.addEventListener('change', toggleExpenseCustomDates);
+    toggleExpenseCustomDates();
+}
 });

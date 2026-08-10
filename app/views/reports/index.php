@@ -9,24 +9,51 @@
             <small class="text-muted">Daily summary of sales, expenses, and net profit.</small>
         </div>
 
-        <form method="GET" action="<?= BASE_URL; ?>/index.php" class="d-flex gap-2">
-            <input type="hidden" name="route" value="reports">
+        <form method="GET" action="<?= BASE_URL; ?>/index.php" class="report-filter-form">
+    <input type="hidden" name="route" value="reports">
 
-            <input 
-                type="date" 
-                name="date" 
-                class="form-control form-control-sm"
-                value="<?= htmlspecialchars($selectedDate); ?>">
+    <select name="period" class="form-select form-select-sm" id="reportPeriod">
+        <option value="today" <?= $period === 'today' ? 'selected' : ''; ?>>Today</option>
+        <option value="yesterday" <?= $period === 'yesterday' ? 'selected' : ''; ?>>Yesterday</option>
+        <option value="this_week" <?= $period === 'this_week' ? 'selected' : ''; ?>>This Week</option>
+        <option value="last_week" <?= $period === 'last_week' ? 'selected' : ''; ?>>Last Week</option>
+        <option value="this_month" <?= $period === 'this_month' ? 'selected' : ''; ?>>This Month</option>
+        <option value="last_month" <?= $period === 'last_month' ? 'selected' : ''; ?>>Last Month</option>
+        <option value="this_quarter" <?= $period === 'this_quarter' ? 'selected' : ''; ?>>This Quarter</option>
+        <option value="last_quarter" <?= $period === 'last_quarter' ? 'selected' : ''; ?>>Last Quarter</option>
+        <option value="this_year" <?= $period === 'this_year' ? 'selected' : ''; ?>>This Year</option>
+        <option value="custom" <?= $period === 'custom' ? 'selected' : ''; ?>>Custom Range</option>
+    </select>
 
-            <button class="btn btn-success btn-sm">
-                <i class="bi bi-search me-1"></i>
-                Filter
-            </button>
-        </form>
+    <input 
+        type="date" 
+        name="start_date" 
+        id="reportStartDate"
+        class="form-control form-control-sm"
+        value="<?= htmlspecialchars($startDate); ?>">
+
+    <input 
+        type="date" 
+        name="end_date" 
+        id="reportEndDate"
+        class="form-control form-control-sm"
+        value="<?= htmlspecialchars($endDate); ?>">
+
+    <button class="btn btn-success btn-sm">
+        <i class="bi bi-search me-1"></i>
+        Apply
+    </button>
+</form>
     </div>
 
     <div class="section-heading mt-4">
-        <h5>Report for <?= date('d M Y', strtotime($selectedDate)); ?></h5>
+        <h5><?= htmlspecialchars($periodLabel); ?> Report</h5>
+<p>
+    Showing results from 
+    <strong><?= date('d M Y', strtotime($startDate)); ?></strong>
+    to
+    <strong><?= date('d M Y', strtotime($endDate)); ?></strong>.
+</p>
         <p>Revenue, expenses, payment breakdown, and profit summary.</p>
     </div>
 
@@ -139,7 +166,7 @@
 
     <div class="row g-3">
         <div class="col-md-4">
-            <a href="<?= BASE_URL; ?>/index.php?route=sales&date=<?= htmlspecialchars($selectedDate); ?>" class="report-action-card">
+            <a href="<?= BASE_URL; ?>/index.php?route=sales&date=<?= htmlspecialchars($startDate); ?>" class="report-action-card">
                 <i class="bi bi-cash-stack"></i>
                 <div>
                     <strong>View Sales</strong>
@@ -149,7 +176,7 @@
         </div>
 
         <div class="col-md-4">
-            <a href="<?= BASE_URL; ?>/index.php?route=expenses&date=<?= htmlspecialchars($selectedDate); ?>" class="report-action-card">
+            <a href="<?= BASE_URL; ?>/index.php?route=expenses&date=<?= htmlspecialchars($startDate); ?>" class="report-action-card">
                 <i class="bi bi-journal-minus"></i>
                 <div>
                     <strong>View Expenses</strong>
