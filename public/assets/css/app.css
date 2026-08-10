@@ -932,3 +932,62 @@ a {
         padding: 12px;
     }
 }
+
+.expense-stat-card i {
+    background: rgba(220, 53, 69, 0.12);
+    color: #dc3545;
+}
+
+.profit-stat-card i {
+    background: rgba(0, 166, 81, 0.12);
+    color: var(--brand-green);
+}
+
+.profit-stat-card.loss i {
+    background: rgba(220, 53, 69, 0.12);
+    color: #dc3545;
+}
+
+.report-action-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: var(--shadow-card);
+    color: #101820;
+    transition: all 0.2s ease;
+    height: 100%;
+}
+
+.report-action-card i {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    background: rgba(0, 166, 81, 0.12);
+    color: var(--brand-green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.report-action-card strong {
+    display: block;
+    font-size: 15px;
+    font-weight: 800;
+    margin-bottom: 3px;
+}
+
+.report-action-card span {
+    display: block;
+    color: var(--brand-muted);
+    font-size: 13px;
+}
+
+.report-action-card:hover {
+    transform: translateY(-2px);
+    color: #101820;
+}

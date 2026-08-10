@@ -16,6 +16,11 @@ class Sale
 
     public function getStatsByDate(string $date): object
     {
+        return $this->getStatsByRange($date, $date);
+    }
+
+    public function getStatsByRange(string $startDate, string $endDate): object
+    {
         $stmt = $this->db->prepare("
             SELECT
                 COUNT(*) AS total_sales,
@@ -31,11 +36,12 @@ class Sale
                 COALESCE(SUM(CASE WHEN payment_method = 'eft' THEN amount ELSE 0 END), 0) AS eft_total,
                 COALESCE(SUM(CASE WHEN payment_method = 'free' THEN amount ELSE 0 END), 0) AS free_total
             FROM sales
-            WHERE DATE(created_at) = :sale_date
+            WHERE DATE(created_at) BETWEEN :start_date AND :end_date
         ");
 
         $stmt->execute([
-            ':sale_date' => $date
+            ':start_date' => $startDate,
+            ':end_date' => $endDate
         ]);
 
         return $stmt->fetch();

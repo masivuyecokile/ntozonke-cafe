@@ -45,16 +45,22 @@ class Expense
 
     public function getStatsByDate(string $date): object
     {
+        return $this->getStatsByRange($date, $date);
+    }
+
+    public function getStatsByRange(string $startDate, string $endDate): object
+    {
         $stmt = $this->db->prepare("
             SELECT
                 COUNT(*) AS total_expenses,
                 COALESCE(SUM(amount), 0) AS total_expense_amount
             FROM expenses
-            WHERE expense_date = :expense_date
+            WHERE expense_date BETWEEN :start_date AND :end_date
         ");
 
         $stmt->execute([
-            ':expense_date' => $date
+            ':start_date' => $startDate,
+            ':end_date' => $endDate
         ]);
 
         return $stmt->fetch();
