@@ -74,7 +74,7 @@
     </div>
 </div>
 <div class="section-heading mt-4">
-    <h5>Todayâ€™s Sales Summary</h5>
+    <h5>Today's' Sales Summary</h5>
     <p>Live revenue from internet sessions, extensions, and printing.</p>
 </div>
 

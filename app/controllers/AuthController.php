@@ -28,9 +28,11 @@ class AuthController {
             $_SESSION['user_name']=$user->name;
             $_SESSION['user_role']=$user->role;
             jsonResponse(true, 'Login successful. Redirecting...', ['redirect'=>BASE_URL.'/index.php?route=dashboard']);
-        }catch(Exception $e) {
-            jsonResponse(false, 'System error. Please try again.', [], 500);
-        }
+        }catch (Throwable $e) {
+    error_log('LOGIN ERROR: ' . $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine());
+
+    jsonResponse(false, 'System error. Please try again.', [], 500);
+}
     }public function logout():void {
         session_destroy();
         header('Location: '.BASE_URL.'/index.php?route=login');
