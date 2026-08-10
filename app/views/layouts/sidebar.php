@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $currentRoute = $_GET['route'] ?? 'dashboard';
 
 function isActiveRoute(string $route, string $currentRoute): string

@@ -1,0 +1,6 @@
+RewriteEngine On
+
+RewriteRule ^api/client/heartbeat/?$ index.php?route=client.heartbeat [QSA,L]
+RewriteRule ^api/client/status/?$ index.php?route=client.status [QSA,L]
+RewriteRule ^api/client/session/?$ index.php?route=client.session [QSA,L]
+RewriteRule ^api/client/print-job/?$ index.php?route=client.print-job [QSA,L]

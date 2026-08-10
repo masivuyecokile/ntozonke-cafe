@@ -1,0 +1,7 @@
+{
+    "server_url": "http://localhost:8089",
+    "client_key": "ntozonke-local-client-2026",
+    "pc_id": 1,
+    "pc_name": "PC 1",
+    "poll_seconds": 5
+}

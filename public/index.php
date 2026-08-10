@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 ob_start();
 session_start();
@@ -20,6 +20,7 @@ require_once __DIR__ . '/../app/controllers/ReportController.php';
 require_once __DIR__ . '/../app/controllers/MemberController.php';
 require_once __DIR__ . '/../app/controllers/SettingsController.php';
 require_once __DIR__ . '/../app/controllers/ExpenseController.php';
+require_once __DIR__ . '/../app/controllers/ClientApiController.php';
 
 $route = $_GET['route'] ?? 'login';
 
@@ -36,11 +37,16 @@ $reportController = new ReportController();
 $memberController = new MemberController();
 $settingsController = new SettingsController();
 $expenseController = new ExpenseController();
+$clientApiController = new ClientApiController();
 
 
 $publicRoutes = [
     'login',
-    'auth.login'
+    'auth.login',
+    'client.heartbeat',
+    'client.status',
+    'client.session',
+    'client.print-job'
 ];
 
 if (!isset($_SESSION['user_id']) && !in_array($route, $publicRoutes, true)) {
@@ -180,6 +186,21 @@ case 'pc-stations.status':
 
 case 'expenses.store':
     $expenseController->storeAjax();
+    break;
+case 'client.heartbeat':
+    $clientApiController->heartbeat();
+    break;
+
+case 'client.status':
+    $clientApiController->status();
+    break;
+
+case 'client.session':
+    $clientApiController->session();
+    break;
+
+case 'client.print-job':
+    $clientApiController->printJob();
     break;
 
     default:

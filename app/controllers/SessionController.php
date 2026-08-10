@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once __DIR__.'/../models/InternetPackage.php';
 require_once __DIR__.'/../models/CafeSession.php';
 class SessionController {

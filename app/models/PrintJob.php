@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 class PrintJob {
     private PDO $db;
     public function __construct() {

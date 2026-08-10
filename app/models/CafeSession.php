@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 class CafeSession
 {
     private PDO $db;
@@ -6,20 +6,32 @@ class CafeSession
     {
         $this->db = (new Database())->connect();
     }
-    public function getActiveByPcId(int $pcId): ?object
-    {
-        $stmt = $this->db->prepare("
-    SELECT *
-    FROM sessions
-    WHERE pc_id = :pc_id
-    AND status = 'active'
-    ORDER BY id DESC
-    LIMIT 1
+   public function getActiveByPcId(int $pcId): ?object
+{
+    $stmt = $this->db->prepare("
+        SELECT
+            s.*,
+            COALESCE((
+                SELECT SUM(sa.amount)
+                FROM sales sa
+                WHERE sa.session_id = s.id
+                AND sa.sale_type = 'internet'
+            ), s.amount_due, 0) AS internet_income
+        FROM sessions s
+        WHERE s.pc_id = :pc_id
+        AND s.status = 'active'
+        ORDER BY s.id DESC
+        LIMIT 1
     ");
-        $stmt->execute([":pc_id" => $pcId]);
-        $session = $stmt->fetch();
-        return $session ?: null;
-    }
+
+    $stmt->execute([
+        ':pc_id' => $pcId
+    ]);
+
+    $session = $stmt->fetch();
+
+    return $session ?: null;
+}
 
     public function getActiveSessionsIndexedByPc(): array
     {
@@ -410,11 +422,10 @@ WHERE id = :pc_id
         ORDER BY s.created_at DESC, s.id DESC
     ");
 
-        $stmt->execute([
-            ":start_date" => $startDate,
-            ":end_date" => $endDate,
-        ]);
+        $stmt->execute([":start_date" => $startDate, ":end_date" => $endDate]);
 
         return $stmt->fetchAll();
     }
+
+
 }

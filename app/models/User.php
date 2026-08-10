@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 class User {
     private PDO $db;
     public function __construct() {

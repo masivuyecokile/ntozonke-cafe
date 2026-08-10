@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 class PC
 {
@@ -31,6 +31,24 @@ class PC
 
         $stmt->execute([
             ':id' => $id
+        ]);
+
+        $pc = $stmt->fetch();
+
+        return $pc ?: null;
+    }
+
+    public function findByName(string $pcName): ?object
+    {
+        $stmt = $this->db->prepare("
+            SELECT *
+            FROM pcs
+            WHERE pc_name = :pc_name
+            LIMIT 1
+        ");
+
+        $stmt->execute([
+            ':pc_name' => $pcName
         ]);
 
         $pc = $stmt->fetch();
@@ -115,6 +133,29 @@ class PC
 
         $stmt->execute([
             ':status' => $status,
+            ':id' => $id
+        ]);
+    }
+
+    public function updateHeartbeat(int $id, ?string $ipAddress = null, ?string $macAddress = null): void
+    {
+        $stmt = $this->db->prepare("
+            UPDATE pcs
+            SET
+                last_heartbeat = NOW(),
+                ip_address = COALESCE(:ip_address, ip_address),
+                mac_address = COALESCE(:mac_address, mac_address),
+                status = CASE
+                    WHEN status = 'offline' THEN 'locked'
+                    ELSE status
+                END,
+                sync_status = 'pending'
+            WHERE id = :id
+        ");
+
+        $stmt->execute([
+            ':ip_address' => $ipAddress ?: null,
+            ':mac_address' => $macAddress ?: null,
             ':id' => $id
         ]);
     }

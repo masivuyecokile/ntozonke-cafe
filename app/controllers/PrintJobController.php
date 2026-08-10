@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once __DIR__.'/../models/PrintJob.php';
 require_once __DIR__.'/../models/PC.php';
 class PrintJobController {

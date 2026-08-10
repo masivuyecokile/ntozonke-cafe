@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 class InternetPackage {
     private PDO $db;
     public function __construct() {

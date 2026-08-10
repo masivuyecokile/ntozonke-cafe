@@ -64,136 +64,124 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /**
-     * Start Session
-     */
-    const startButtons = document.querySelectorAll('.js-start-session');
-    const startSessionModalEl = document.getElementById('startSessionModal');
-    const startSessionForm = document.getElementById('startSessionForm');
-    const startSessionBtn = document.getElementById('startSessionBtn');
+ * Start Session
+ */
+const startSessionButtons = document.querySelectorAll('.js-start-session');
+const startSessionForm = document.getElementById('startSessionForm');
+const startSessionBtn = document.getElementById('startSessionBtn');
+const startPcId = document.getElementById('startPcId');
+const startPcName = document.getElementById('startPcName');
+const startPackageId = document.getElementById('startPackageId');
 
-    const sessionPcId = document.getElementById('sessionPcId');
-    const sessionPcName = document.getElementById('sessionPcName');
+startSessionButtons.forEach(function (button) {
+    button.addEventListener('click', function () {
+        const pcId = button.dataset.pcId || '';
+        const pcName = button.dataset.pcName || 'Selected PC';
 
-    const packageSelect = document.getElementById('packageSelect');
-    const packageSummary = document.getElementById('packageSummary');
-    const summaryMinutes = document.getElementById('summaryMinutes');
-    const summaryPrice = document.getElementById('summaryPrice');
-
-    if (startSessionModalEl && startSessionForm && startSessionBtn) {
-        const startSessionModal = new bootstrap.Modal(startSessionModalEl);
-
-        startButtons.forEach(function (button) {
-            button.addEventListener('click', function () {
-                const pcId = this.dataset.pcId;
-                const pcName = this.dataset.pcName;
-
-                sessionPcId.value = pcId;
-                sessionPcName.textContent = pcName;
-
-                startSessionForm.reset();
-
-                if (packageSummary) {
-                    packageSummary.classList.add('d-none');
-                }
-
-                startSessionModal.show();
-            });
-        });
-
-        if (packageSelect) {
-            packageSelect.addEventListener('change', function () {
-                const selectedOption = this.options[this.selectedIndex];
-
-                if (!selectedOption.value) {
-                    packageSummary.classList.add('d-none');
-                    summaryMinutes.textContent = '0 minutes';
-                    summaryPrice.textContent = 'R0.00';
-                    return;
-                }
-
-                const minutes = selectedOption.dataset.minutes;
-                const price = selectedOption.dataset.price;
-
-                summaryMinutes.textContent = `${minutes} minutes`;
-                summaryPrice.textContent = `R${parseFloat(price).toFixed(2)}`;
-
-                packageSummary.classList.remove('d-none');
-            });
+        if (startPcId) {
+            startPcId.value = pcId;
         }
 
-        startSessionForm.addEventListener('submit', async function (e) {
-            e.preventDefault();
+        if (startPcName) {
+            startPcName.textContent = pcName;
+        }
 
-            const originalBtnText = startSessionBtn.innerHTML;
-            const formData = new FormData(startSessionForm);
+        if (startPackageId) {
+            startPackageId.value = '';
+        }
 
-            startSessionBtn.disabled = true;
-            startSessionBtn.innerHTML = `
-                <span class="spinner-border spinner-border-sm me-2"></span>
-                Starting...
-            `;
+        console.log('Start session selected:', {
+            pcId: pcId,
+            pcName: pcName
+        });
+    });
+});
+
+if (startSessionForm && startSessionBtn) {
+    startSessionForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const pcIdValue = startPcId ? startPcId.value : '';
+        const packageIdValue = startPackageId ? startPackageId.value : '';
+
+        if (!pcIdValue || !packageIdValue) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Missing Details',
+                text: 'Please select a valid PC and internet package.',
+                confirmButtonColor: '#00a651'
+            });
+            return;
+        }
+
+        const originalText = startSessionBtn.innerHTML;
+        const formData = new FormData(startSessionForm);
+
+        startSessionBtn.disabled = true;
+        startSessionBtn.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            Starting...
+        `;
+
+        try {
+            const response = await fetch(startSessionForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            let data;
 
             try {
-                const response = await fetch(startSessionForm.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
-
-                let data;
-
-                try {
-                    data = await parseJsonResponse(response, 'START SESSION RESPONSE');
-                } catch (error) {
-                    showServerJsonError(startSessionBtn, originalBtnText);
-                    return;
-                }
-
-                if (!data.success) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Could Not Start Session',
-                        text: data.message || 'Something went wrong.',
-                        confirmButtonColor: '#00a651'
-                    });
-
-                    startSessionBtn.disabled = false;
-                    startSessionBtn.innerHTML = originalBtnText;
-                    return;
-                }
-
-                startSessionModal.hide();
-
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Session Started',
-                    text: data.message,
-                    timer: 1200,
-                    showConfirmButton: false
-                });
-
-                setTimeout(function () {
-                    window.location.reload();
-                }, 1200);
-
+                data = await parseJsonResponse(response, 'START SESSION RESPONSE');
             } catch (error) {
-                console.error('Start session fetch error:', error);
+                showServerJsonError(startSessionBtn, originalText);
+                return;
+            }
 
+            if (!data.success) {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Connection Error',
-                    text: 'Could not connect to the local server.',
+                    title: 'Could Not Start Session',
+                    text: data.message || 'Something went wrong.',
                     confirmButtonColor: '#00a651'
                 });
 
                 startSessionBtn.disabled = false;
-                startSessionBtn.innerHTML = originalBtnText;
+                startSessionBtn.innerHTML = originalText;
+                return;
             }
-        });
-    }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Session Started',
+                text: data.message,
+                timer: 1200,
+                showConfirmButton: false
+            });
+
+            setTimeout(function () {
+                window.location.reload();
+            }, 1200);
+
+        } catch (error) {
+            console.error('Start session error:', error);
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Connection Error',
+                text: 'Could not connect to the local server.',
+                confirmButtonColor: '#00a651'
+            });
+
+            startSessionBtn.disabled = false;
+            startSessionBtn.innerHTML = originalText;
+        }
+    });
+}
 
     /**
      * End Session
