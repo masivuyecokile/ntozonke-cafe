@@ -1,0 +1,83 @@
+Ntozonke Cafe Client App
+------------------------
+Server: http://localhost:8089
+PC ID: 1
+PC Name: PC 1
+Admin exit: Ctrl + Shift + Q
+
+[22:31:59] ACTION CHANGED: LOCK
+[22:31:59] Action: lock | Lock: True
+[22:32:04] Action: lock | Lock: True
+[22:32:09] Action: lock | Lock: True
+Ntozonke Cafe Client App
+------------------------
+Server: http://localhost:8089
+PC ID: 1
+PC Name: PC 1
+Admin exit: Ctrl + Shift + Q
+
+[22:32:56] ACTION CHANGED: UNLOCK
+[22:32:56] Action: unlock | Lock: False | Remaining: 55s | Amount: R20.00
+[22:33:01] Action: unlock | Lock: False | Remaining: 50s | Amount: R20.00
+[22:33:06] Action: unlock | Lock: False | Remaining: 45s | Amount: R20.00
+[22:33:11] Action: unlock | Lock: False | Remaining: 40s | Amount: R20.00
+[22:33:17] Action: unlock | Lock: False | Remaining: 34s | Amount: R20.00
+[22:33:22] Action: unlock | Lock: False | Remaining: 29s | Amount: R20.00
+[22:33:27] Action: unlock | Lock: False | Remaining: 24s | Amount: R20.00
+[22:33:32] Action: unlock | Lock: False | Remaining: 19s | Amount: R20.00
+[22:33:37] Action: unlock | Lock: False | Remaining: 14s | Amount: R20.00
+[22:33:42] Action: unlock | Lock: False | Remaining: 9s | Amount: R20.00
+[22:33:47] Action: unlock | Lock: False | Remaining: 4s | Amount: R20.00
+[22:33:52] Action: unlock | Lock: False | Remaining: expired | Amount: R20.00
+[22:33:57] ACTION CHANGED: LOCK
+[22:33:57] Action: lock | Lock: True
+[22:34:02] Action: lock | Lock: True
+[22:34:07] Action: lock | Lock: True
+[22:34:13] Action: lock | Lock: True
+[22:34:18] Action: lock | Lock: True
+[22:34:24] Action: lock | Lock: True
+[22:34:29] Action: lock | Lock: True
+[22:34:35] Action: lock | Lock: True
+[22:34:40] Action: lock | Lock: True
+[22:34:45] Action: lock | Lock: True
+[22:34:50] Action: lock | Lock: True
+[22:34:55] Action: lock | Lock: True
+[22:35:00] Action: lock | Lock: True
+[22:35:05] Action: lock | Lock: True
+[22:35:10] Action: lock | Lock: True
+[22:35:15] Action: lock | Lock: True
+[22:35:20] Action: lock | Lock: True
+[22:35:26] Action: lock | Lock: True
+[22:35:31] Action: lock | Lock: True
+[22:35:36] Action: lock | Lock: True
+[22:35:41] Action: lock | Lock: True
+[22:35:46] Action: lock | Lock: True
+[22:35:51] Action: lock | Lock: True
+[22:35:56] Action: lock | Lock: True
+[22:36:01] Action: lock | Lock: True
+[22:36:07] Action: lock | Lock: True
+[22:36:13] Action: lock | Lock: True
+[22:36:18] Action: lock | Lock: True
+Ntozonke Cafe Client App
+------------------------
+Server: http://localhost:8089
+PC ID: 1
+PC Name: PC 1
+Admin exit: Ctrl + Shift + Q
+
+[22:44:43] ACTION CHANGED: LOCK
+[22:44:43] Action: lock | Lock: True
+[22:44:48] Action: lock | Lock: True
+[22:44:53] Action: lock | Lock: True
+Ntozonke Cafe Client App
+------------------------
+Server: http://localhost:8089
+PC ID: 1
+PC Name: PC 1
+Admin exit: Ctrl + Shift + Q
+
+[22:54:48] ACTION CHANGED: LOCK
+[22:54:48] Action: lock | Lock: True
+[22:54:54] Action: lock | Lock: True
+[22:54:59] Action: lock | Lock: True
+[22:55:04] Action: lock | Lock: True
