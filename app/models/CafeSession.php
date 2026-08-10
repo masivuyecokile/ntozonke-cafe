@@ -241,4 +241,40 @@ WHERE id = :pc_id
             throw $e;
         }
     }
+
+    public function getRecent(int $limit = 50): array
+{
+    $stmt = $this->db->prepare("
+        SELECT
+            s.*,
+            p.pc_name,
+            u.name AS created_by_name
+        FROM sessions s
+        LEFT JOIN pcs p ON p.id = s.pc_id
+        LEFT JOIN users u ON u.id = s.created_by
+        ORDER BY s.id DESC
+        LIMIT :limit
+    ");
+
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->execute();
+
+    return $stmt->fetchAll();
 }
+
+public function getTodayStats(): object
+{
+    $stmt = $this->db->query("
+        SELECT
+            COUNT(*) AS total_sessions,
+            COALESCE(SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END), 0) AS active_sessions,
+            COALESCE(SUM(CASE WHEN status = 'ended' THEN 1 ELSE 0 END), 0) AS ended_sessions,
+            COALESCE(SUM(minutes_purchased + extended_minutes), 0) AS total_minutes
+        FROM sessions
+        WHERE DATE(created_at) = CURDATE()
+    ");
+
+    return $stmt->fetch();
+}
+}
+

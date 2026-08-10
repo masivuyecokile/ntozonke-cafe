@@ -78,4 +78,17 @@ class SessionController {
             jsonResponse(false, $e->getMessage(), [], 500);
         }
     }
+
+    public function index(): void
+{
+    $sessionModel = new CafeSession();
+
+    $stats = $sessionModel->getTodayStats();
+    $sessions = $sessionModel->getRecent(50);
+
+    $csrfToken = $_SESSION['csrf_token'] ?? bin2hex(random_bytes(32));
+    $_SESSION['csrf_token'] = $csrfToken;
+
+    require_once __DIR__ . '/../views/sessions/index.php';
+}
 }
