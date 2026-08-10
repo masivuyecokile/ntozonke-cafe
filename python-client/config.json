@@ -3,5 +3,8 @@
     "client_key": "ntozonke-local-client-2026",
     "pc_id": 1,
     "pc_name": "PC 1",
-    "poll_seconds": 5
+    "poll_seconds": 5,
+    "admin_pin": "1234",
+    "logo_path": "logo.png",
+    "business_name": "Ntozonke Internet Cafe"
 }
