@@ -1,10 +1,14 @@
 ﻿<?php
-class CafeSession {
+class CafeSession
+{
     private PDO $db;
-    public function __construct() {
-        $this->db=(new Database())->connect();
-    }public function getActiveByPcId(int $pcId):?object {
-        $stmt=$this->db->prepare("
+    public function __construct()
+    {
+        $this->db = (new Database())->connect();
+    }
+    public function getActiveByPcId(int $pcId): ?object
+    {
+        $stmt = $this->db->prepare("
     SELECT *
     FROM sessions
     WHERE pc_id = :pc_id
@@ -12,40 +16,63 @@ class CafeSession {
     ORDER BY id DESC
     LIMIT 1
     ");
-        $stmt->execute([':pc_id'=>$pcId]);
-        $session=$stmt->fetch();
-        return $session?:null;
-    }public function getActiveSessionsIndexedByPc():array {
-        $stmt=$this->db->query("
-    SELECT *
-    FROM sessions
-    WHERE status = 'active'
-    ORDER BY id DESC
+        $stmt->execute([":pc_id" => $pcId]);
+        $session = $stmt->fetch();
+        return $session ?: null;
+    }
+
+    public function getActiveSessionsIndexedByPc(): array
+    {
+        $stmt = $this->db->query("
+        SELECT
+            s.*,
+            COALESCE((
+                SELECT SUM(sa.amount)
+                FROM sales sa
+                WHERE sa.session_id = s.id
+                AND sa.sale_type = 'internet'
+            ), s.amount_due, 0) AS internet_income
+        FROM sessions s
+        WHERE s.status = 'active'
+        ORDER BY s.id DESC
     ");
-        $sessions=$stmt->fetchAll();
-        $indexed=[];
-        foreach($sessions as $session) {
-            $indexed[$session->pc_id]=$session;
-        }return $indexed;
-    }public function startSession(array $data):int {
+
+        $sessions = $stmt->fetchAll();
+
+        $indexed = [];
+
+        foreach ($sessions as $session) {
+            $indexed[(int) $session->pc_id] = $session;
+        }
+
+        return $indexed;
+    }
+
+    public function startSession(array $data): int
+    {
         $this->db->beginTransaction();
         try {
-            $pcStmt=$this->db->prepare("
+            $pcStmt = $this->db->prepare("
         SELECT *
         FROM pcs
         WHERE id = :pc_id
         FOR UPDATE
         ");
-            $pcStmt->execute([':pc_id'=>$data['pc_id']]);
-            $pc=$pcStmt->fetch();
-            if(!$pc) {
-                throw new Exception('PC not found.');
-            }if($pc->status==='active') {
-                throw new Exception('This PC already has an active session.');
-            }$startTime=new DateTime('now', new DateTimeZone('Africa/Johannesburg'));
-            $endTime=clone $startTime;
-            $endTime->modify('+'.(int)$data['minutes'].' minutes');
-            $stmt=$this->db->prepare("
+            $pcStmt->execute([":pc_id" => $data["pc_id"]]);
+            $pc = $pcStmt->fetch();
+            if (!$pc) {
+                throw new Exception("PC not found.");
+            }
+            if ($pc->status === "active") {
+                throw new Exception("This PC already has an active session.");
+            }
+            $startTime = new DateTime(
+                "now",
+                new DateTimeZone("Africa/Johannesburg")
+            );
+            $endTime = clone $startTime;
+            $endTime->modify("+" . (int) $data["minutes"] . " minutes");
+            $stmt = $this->db->prepare("
 INSERT INTO sessions (
 pc_id,
 customer_name,
@@ -68,9 +95,18 @@ created_by
 :created_by
 )
 ");
-            $stmt->execute([':pc_id'=>$data['pc_id'], ':customer_name'=>$data['customer_name'], ':start_time'=>$startTime->format('Y-m-d H:i:s'), ':end_time'=>$endTime->format('Y-m-d H:i:s'), ':minutes_purchased'=>$data['minutes'], ':rate_per_minute'=>$data['rate_per_minute'], ':amount_due'=>$data['amount_due'], ':created_by'=>$data['created_by']]);
-            $sessionId=(int)$this->db->lastInsertId();
-            $saleStmt=$this->db->prepare("
+            $stmt->execute([
+                ":pc_id" => $data["pc_id"],
+                ":customer_name" => $data["customer_name"],
+                ":start_time" => $startTime->format("Y-m-d H:i:s"),
+                ":end_time" => $endTime->format("Y-m-d H:i:s"),
+                ":minutes_purchased" => $data["minutes"],
+                ":rate_per_minute" => $data["rate_per_minute"],
+                ":amount_due" => $data["amount_due"],
+                ":created_by" => $data["created_by"],
+            ]);
+            $sessionId = (int) $this->db->lastInsertId();
+            $saleStmt = $this->db->prepare("
 INSERT INTO sales (
 session_id,
 sale_type,
@@ -89,24 +125,32 @@ sync_status
 'pending'
 )
 ");
-            $saleStmt->execute([':session_id'=>$sessionId, ':description'=>'Internet session start - '.$data['customer_name'], ':amount'=>$data['amount_due'], ':created_by'=>$data['created_by']]);
-            $updatePc=$this->db->prepare("
+            $saleStmt->execute([
+                ":session_id" => $sessionId,
+                ":description" =>
+                    "Internet session start - " . $data["customer_name"],
+                ":amount" => $data["amount_due"],
+                ":created_by" => $data["created_by"],
+            ]);
+            $updatePc = $this->db->prepare("
 UPDATE pcs
 SET status = 'active',
 sync_status = 'pending'
 WHERE id = :pc_id
 ");
-            $updatePc->execute([':pc_id'=>$data['pc_id']]);
+            $updatePc->execute([":pc_id" => $data["pc_id"]]);
             $this->db->commit();
             return $sessionId;
-        }catch(Exception $e) {
+        } catch (Exception $e) {
             $this->db->rollBack();
             throw $e;
         }
-    }public function endSession(int $sessionId, int $endedBy):object {
+    }
+    public function endSession(int $sessionId, int $endedBy): object
+    {
         $this->db->beginTransaction();
         try {
-            $stmt=$this->db->prepare("
+            $stmt = $this->db->prepare("
         SELECT *
         FROM sessions
         WHERE id = :session_id
@@ -114,36 +158,51 @@ WHERE id = :pc_id
         LIMIT 1
         FOR UPDATE
         ");
-            $stmt->execute([':session_id'=>$sessionId]);
-            $session=$stmt->fetch();
-            if(!$session) {
-                throw new Exception('Active session not found or already ended.');
-            }$actualEndTime=new DateTime('now', new DateTimeZone('Africa/Johannesburg'));
-            $updateSession=$this->db->prepare("
+            $stmt->execute([":session_id" => $sessionId]);
+            $session = $stmt->fetch();
+            if (!$session) {
+                throw new Exception(
+                    "Active session not found or already ended."
+                );
+            }
+            $actualEndTime = new DateTime(
+                "now",
+                new DateTimeZone("Africa/Johannesburg")
+            );
+            $updateSession = $this->db->prepare("
 UPDATE sessions
 SET status = 'ended',
 actual_end_time = :actual_end_time,
 sync_status = 'pending'
 WHERE id = :session_id
 ");
-            $updateSession->execute([':actual_end_time'=>$actualEndTime->format('Y-m-d H:i:s'), ':session_id'=>$sessionId]);
-            $updatePc=$this->db->prepare("
+            $updateSession->execute([
+                ":actual_end_time" => $actualEndTime->format("Y-m-d H:i:s"),
+                ":session_id" => $sessionId,
+            ]);
+            $updatePc = $this->db->prepare("
 UPDATE pcs
 SET status = 'locked',
 sync_status = 'pending'
 WHERE id = :pc_id
 ");
-            $updatePc->execute([':pc_id'=>$session->pc_id]);
+            $updatePc->execute([":pc_id" => $session->pc_id]);
             $this->db->commit();
             return $session;
-        }catch(Exception $e) {
+        } catch (Exception $e) {
             $this->db->rollBack();
             throw $e;
         }
-    }public function extendSession(int $sessionId, int $minutes, float $amount, int $extendedBy):object {
+    }
+    public function extendSession(
+        int $sessionId,
+        int $minutes,
+        float $amount,
+        int $extendedBy
+    ): object {
         $this->db->beginTransaction();
         try {
-            $stmt=$this->db->prepare("
+            $stmt = $this->db->prepare("
         SELECT s.*, p.pc_name
         FROM sessions s
         LEFT JOIN pcs p ON p.id = s.pc_id
@@ -152,11 +211,14 @@ WHERE id = :pc_id
         LIMIT 1
         FOR UPDATE
         ");
-            $stmt->execute([':session_id'=>$sessionId]);
-            $session=$stmt->fetch();
-            if(!$session) {
-                throw new Exception('Active session not found or already ended.');
-            }$updateSession=$this->db->prepare("
+            $stmt->execute([":session_id" => $sessionId]);
+            $session = $stmt->fetch();
+            if (!$session) {
+                throw new Exception(
+                    "Active session not found or already ended."
+                );
+            }
+            $updateSession = $this->db->prepare("
 UPDATE sessions
 SET end_time = DATE_ADD(end_time, INTERVAL :minutes MINUTE),
 extended_minutes = extended_minutes + :minutes_2,
@@ -164,8 +226,13 @@ amount_due = amount_due + :amount,
 sync_status = 'pending'
 WHERE id = :session_id
 ");
-            $updateSession->execute([':minutes'=>$minutes, ':minutes_2'=>$minutes, ':amount'=>$amount, ':session_id'=>$sessionId]);
-            $saleStmt=$this->db->prepare("
+            $updateSession->execute([
+                ":minutes" => $minutes,
+                ":minutes_2" => $minutes,
+                ":amount" => $amount,
+                ":session_id" => $sessionId,
+            ]);
+            $saleStmt = $this->db->prepare("
 INSERT INTO sales (
 session_id,
 sale_type,
@@ -184,67 +251,87 @@ sync_status
 'pending'
 )
 ");
-            $saleStmt->execute([':session_id'=>$sessionId, ':description'=>'Internet session extension - '.$session->customer_name.' ('.$minutes.' minutes)', ':amount'=>$amount, ':created_by'=>$extendedBy]);
-            $getUpdated=$this->db->prepare("
+            $saleStmt->execute([
+                ":session_id" => $sessionId,
+                ":description" =>
+                    "Internet session extension - " .
+                    $session->customer_name .
+                    " (" .
+                    $minutes .
+                    " minutes)",
+                ":amount" => $amount,
+                ":created_by" => $extendedBy,
+            ]);
+            $getUpdated = $this->db->prepare("
 SELECT *
 FROM sessions
 WHERE id = :session_id
 LIMIT 1
 ");
-            $getUpdated->execute([':session_id'=>$sessionId]);
-            $updatedSession=$getUpdated->fetch();
+            $getUpdated->execute([":session_id" => $sessionId]);
+            $updatedSession = $getUpdated->fetch();
             $this->db->commit();
             return $updatedSession;
-        }catch(Exception $e) {
+        } catch (Exception $e) {
             $this->db->rollBack();
             throw $e;
         }
-    }public function expireOverdueSessions():array {
+    }
+    public function expireOverdueSessions(): array
+    {
         $this->db->beginTransaction();
         try {
-            $now=new DateTime('now', new DateTimeZone('Africa/Johannesburg'));
-            $nowString=$now->format('Y-m-d H:i:s');
-            $stmt=$this->db->prepare("
+            $now = new DateTime("now", new DateTimeZone("Africa/Johannesburg"));
+            $nowString = $now->format("Y-m-d H:i:s");
+            $stmt = $this->db->prepare("
         SELECT *
         FROM sessions
         WHERE status = 'active'
         AND end_time <= :now_time
         FOR UPDATE
         ");
-            $stmt->execute([':now_time'=>$nowString]);
-            $sessions=$stmt->fetchAll();
-            if(!$sessions) {
+            $stmt->execute([":now_time" => $nowString]);
+            $sessions = $stmt->fetchAll();
+            if (!$sessions) {
                 $this->db->commit();
-                return['expired_count'=>0, 'pc_ids'=>[]];
-            }$expiredPcIds=[];
-            foreach($sessions as $session) {
-                $expiredPcIds[]=(int)$session->pc_id;
-                $updateSession=$this->db->prepare("
+                return ["expired_count" => 0, "pc_ids" => []];
+            }
+            $expiredPcIds = [];
+            foreach ($sessions as $session) {
+                $expiredPcIds[] = (int) $session->pc_id;
+                $updateSession = $this->db->prepare("
     UPDATE sessions
     SET status = 'ended',
     actual_end_time = :actual_end_time,
     sync_status = 'pending'
     WHERE id = :session_id
     ");
-                $updateSession->execute([':actual_end_time'=>$nowString, ':session_id'=>$session->id]);
-                $updatePc=$this->db->prepare("
+                $updateSession->execute([
+                    ":actual_end_time" => $nowString,
+                    ":session_id" => $session->id,
+                ]);
+                $updatePc = $this->db->prepare("
 UPDATE pcs
 SET status = 'locked',
 sync_status = 'pending'
 WHERE id = :pc_id
 ");
-                $updatePc->execute([':pc_id'=>$session->pc_id]);
-            }$this->db->commit();
-            return['expired_count'=>count($sessions), 'pc_ids'=>$expiredPcIds];
-        }catch(Exception $e) {
+                $updatePc->execute([":pc_id" => $session->pc_id]);
+            }
+            $this->db->commit();
+            return [
+                "expired_count" => count($sessions),
+                "pc_ids" => $expiredPcIds,
+            ];
+        } catch (Exception $e) {
             $this->db->rollBack();
             throw $e;
         }
     }
 
     public function getRecent(int $limit = 50): array
-{
-    $stmt = $this->db->prepare("
+    {
+        $stmt = $this->db->prepare("
         SELECT
             s.*,
             p.pc_name,
@@ -256,25 +343,78 @@ WHERE id = :pc_id
         LIMIT :limit
     ");
 
-    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-    $stmt->execute();
+        $stmt->bindValue(":limit", $limit, PDO::PARAM_INT);
+        $stmt->execute();
 
-    return $stmt->fetchAll();
-}
+        return $stmt->fetchAll();
+    }
 
-public function getTodayStats(): object
-{
-    $stmt = $this->db->query("
+    public function getTodayStats(): object
+    {
+        return $this->getStatsByDate(date("Y-m-d"));
+    }
+
+    public function getStatsByDate(string $date): object
+    {
+        return $this->getStatsByRange($date, $date);
+    }
+
+    public function getStatsByRange(string $startDate, string $endDate): object
+    {
+        $stmt = $this->db->prepare("
         SELECT
             COUNT(*) AS total_sessions,
             COALESCE(SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END), 0) AS active_sessions,
             COALESCE(SUM(CASE WHEN status = 'ended' THEN 1 ELSE 0 END), 0) AS ended_sessions,
-            COALESCE(SUM(minutes_purchased + extended_minutes), 0) AS total_minutes
+            COALESCE(SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END), 0) AS cancelled_sessions,
+            COALESCE(SUM(minutes_purchased + extended_minutes), 0) AS total_minutes,
+
+            COALESCE((
+                SELECT SUM(s.amount)
+                FROM sales s
+                WHERE s.sale_type = 'internet'
+                AND DATE(s.created_at) BETWEEN :sales_start_date AND :sales_end_date
+            ), 0) AS internet_income
         FROM sessions
-        WHERE DATE(created_at) = CURDATE()
+        WHERE DATE(created_at) BETWEEN :start_date AND :end_date
     ");
 
-    return $stmt->fetch();
-}
-}
+        $stmt->execute([
+            ":start_date" => $startDate,
+            ":end_date" => $endDate,
+            ":sales_start_date" => $startDate,
+            ":sales_end_date" => $endDate,
+        ]);
 
+        return $stmt->fetch();
+    }
+
+    public function getByRange(string $startDate, string $endDate): array
+    {
+        $stmt = $this->db->prepare("
+        SELECT
+            s.*,
+            p.pc_name,
+            u.name AS created_by_name,
+
+            COALESCE((
+                SELECT SUM(sa.amount)
+                FROM sales sa
+                WHERE sa.session_id = s.id
+                AND sa.sale_type = 'internet'
+            ), 0) AS internet_income
+        FROM sessions s
+        LEFT JOIN pcs p ON p.id = s.pc_id
+        LEFT JOIN users u ON u.id = s.created_by
+        WHERE DATE(s.created_at) BETWEEN :start_date AND :end_date
+        ORDER BY s.created_at DESC, s.id DESC
+    ");
+
+        $stmt->execute([
+            ":start_date" => $startDate,
+            ":end_date" => $endDate,
+        ]);
+
+        return $stmt->fetchAll();
+    }
+}

@@ -1065,3 +1065,227 @@ a {
 .pc-card .btn {
     min-height: 36px;
 }
+
+/* =========================================================
+   DASHBOARD PC STATIONS - CLEAN CARD DESIGN
+========================================================= */
+
+.dashboard-pc-grid {
+    align-items: stretch;
+}
+
+.dashboard-pc-card {
+    background: #ffffff;
+    border-radius: 22px;
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-pc-header {
+    padding: 20px 20px 16px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    border-bottom: 1px solid #edf0ee;
+}
+
+.dashboard-pc-header h6 {
+    margin: 0 0 6px;
+    font-size: 18px;
+    font-weight: 800;
+    color: #101820;
+}
+
+.dashboard-pc-header span:not(.badge) {
+    display: block;
+    color: var(--brand-muted);
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.dashboard-pc-header .badge {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 11px;
+    font-size: 12px;
+}
+
+.dashboard-pc-screen {
+    margin: 18px 20px 16px;
+    min-height: 150px;
+    border-radius: 18px;
+    background: #101820;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    padding: 20px;
+    text-align: left;
+}
+
+.dashboard-pc-screen.locked {
+    background: linear-gradient(135deg, #101820, #17231c);
+}
+
+.dashboard-pc-screen.active {
+    background: linear-gradient(135deg, var(--brand-green), var(--brand-green-dark));
+}
+
+.dashboard-pc-screen.offline {
+    background: linear-gradient(135deg, #4b4b4b, #222222);
+}
+
+.dashboard-pc-screen.maintenance {
+    background: linear-gradient(135deg, #141c22, #27313a);
+}
+
+.dashboard-pc-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.dashboard-pc-icon i {
+    font-size: 28px;
+    color: #ffffff;
+}
+
+.dashboard-pc-screen-text {
+    min-width: 0;
+}
+
+.dashboard-pc-screen-text strong {
+    display: block;
+    font-size: 17px;
+    font-weight: 800;
+    margin-bottom: 5px;
+    color: #ffffff;
+}
+
+.dashboard-pc-screen-text span {
+    display: block;
+    color: rgba(255,255,255,0.82);
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.dashboard-session-info {
+    margin: 0 20px 16px;
+    background: #f4fbf6;
+    border: 1px solid rgba(0, 166, 81, 0.14);
+    border-radius: 16px;
+    padding: 14px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.dashboard-session-info span {
+    display: block;
+    color: var(--brand-muted);
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.dashboard-session-info strong {
+    display: block;
+    color: #101820;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.dashboard-pc-actions {
+    margin-top: auto;
+    padding: 0 20px 20px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.dashboard-pc-actions .btn {
+    width: 100%;
+    min-height: 40px;
+    border-radius: 14px;
+    font-weight: 700;
+}
+
+@media (max-width: 576px) {
+    .dashboard-pc-screen {
+        flex-direction: column;
+        text-align: center;
+        min-height: 160px;
+    }
+
+    .dashboard-session-info {
+        grid-template-columns: 1fr;
+    }
+}
+
+.dashboard-active-session-box {
+    margin: 0 20px 16px;
+    background: #f4fbf6;
+    border: 1px solid rgba(0, 166, 81, 0.18);
+    border-radius: 16px;
+    padding: 15px;
+}
+
+.dashboard-active-session-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--brand-green-dark);
+    font-size: 14px;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+.dashboard-active-session-title i {
+    font-size: 16px;
+}
+
+.dashboard-active-session-title span {
+    display: inline-block;
+}
+
+.dashboard-active-session-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(0, 166, 81, 0.12);
+}
+
+.dashboard-active-session-row:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+
+.dashboard-active-session-row span {
+    color: var(--brand-muted);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.dashboard-active-session-row strong {
+    color: #101820;
+    font-size: 14px;
+    font-weight: 800;
+    text-align: right;
+}
+
+.dashboard-pc-actions {
+    padding-top: 4px;
+}

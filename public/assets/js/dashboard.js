@@ -274,40 +274,69 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    /**
-     * Live Countdown
-     */
-    function updateSessionCountdowns() {
-        const countdowns = document.querySelectorAll('.js-session-countdown');
-
-        countdowns.forEach(function (countdown) {
-            const endTimestamp = parseInt(countdown.dataset.endTimestamp, 10);
-
-            if (!endTimestamp) return;
-
-            const nowTimestamp = Math.floor(Date.now() / 1000);
-            const remainingSeconds = endTimestamp - nowTimestamp;
-
-            countdown.textContent = formatRemainingTime(remainingSeconds);
-
-            if (remainingSeconds <= 300 && remainingSeconds > 60) {
-                countdown.classList.add('text-warning');
-                countdown.classList.remove('text-danger');
-            }
-
-            if (remainingSeconds <= 60) {
-                countdown.classList.add('text-danger');
-                countdown.classList.remove('text-warning');
-            }
-
-            if (remainingSeconds <= 0) {
-                countdown.textContent = 'Expired';
-                countdown.classList.add('text-danger');
-            }
-        });
+  /**
+ * Live Countdown
+ */
+function formatRemainingTime(totalSeconds) {
+    if (totalSeconds <= 0) {
+        return 'Expired';
     }
 
-    updateSessionCountdowns();
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    if (hours > 0) {
+        return `${hours}h ${minutes}m ${seconds}s`;
+    }
+
+    if (minutes > 0) {
+        return `${minutes}m ${seconds}s`;
+    }
+
+    return `${seconds}s`;
+}
+
+function updateSessionCountdowns() {
+    const countdowns = document.querySelectorAll('.js-session-countdown');
+
+    countdowns.forEach(function (countdown) {
+        let endTimestamp = parseInt(countdown.dataset.endTimestamp, 10);
+
+        if (!endTimestamp && countdown.dataset.endTime) {
+            const parsedDate = new Date(countdown.dataset.endTime.replace(' ', 'T'));
+            endTimestamp = Math.floor(parsedDate.getTime() / 1000);
+        }
+
+        if (!endTimestamp) {
+            countdown.textContent = 'Invalid time';
+            return;
+        }
+
+        const nowTimestamp = Math.floor(Date.now() / 1000);
+        const remainingSeconds = endTimestamp - nowTimestamp;
+
+        countdown.textContent = formatRemainingTime(remainingSeconds);
+
+        countdown.classList.remove('text-warning', 'text-danger');
+
+        if (remainingSeconds <= 300 && remainingSeconds > 60) {
+            countdown.classList.add('text-warning');
+        }
+
+        if (remainingSeconds <= 60) {
+            countdown.classList.add('text-danger');
+        }
+
+        if (remainingSeconds <= 0) {
+            countdown.textContent = 'Expired';
+            countdown.classList.add('text-danger');
+        }
+    });
+}
+
+updateSessionCountdowns();
+setInterval(updateSessionCountdowns, 1000);
 
     if (document.querySelectorAll('.js-session-countdown').length > 0) {
         setInterval(updateSessionCountdowns, 1000);
@@ -1442,4 +1471,25 @@ pcStatusButtons.forEach(function (button) {
         }
     });
 });
+
+/**
+ * Sessions Filter
+ */
+const sessionsPeriod = document.getElementById('sessionsPeriod');
+const sessionsStartDate = document.getElementById('sessionsStartDate');
+const sessionsEndDate = document.getElementById('sessionsEndDate');
+
+function toggleSessionsCustomDates() {
+    if (!sessionsPeriod || !sessionsStartDate || !sessionsEndDate) return;
+
+    const isCustom = sessionsPeriod.value === 'custom';
+
+    sessionsStartDate.style.display = isCustom ? 'block' : 'none';
+    sessionsEndDate.style.display = isCustom ? 'block' : 'none';
+}
+
+if (sessionsPeriod) {
+    sessionsPeriod.addEventListener('change', toggleSessionsCustomDates);
+    toggleSessionsCustomDates();
+}
 });
