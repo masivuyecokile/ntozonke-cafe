@@ -1048,4 +1048,83 @@ if (serviceSaleForm && saveServiceSaleBtn) {
         }
     });
 }
+
+/**
+ * Expenses
+ */
+const expenseForm = document.getElementById('expenseForm');
+const saveExpenseBtn = document.getElementById('saveExpenseBtn');
+
+if (expenseForm && saveExpenseBtn) {
+    expenseForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const originalText = saveExpenseBtn.innerHTML;
+        const formData = new FormData(expenseForm);
+
+        saveExpenseBtn.disabled = true;
+        saveExpenseBtn.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            Saving...
+        `;
+
+        try {
+            const response = await fetch(expenseForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            let data;
+
+            try {
+                data = await parseJsonResponse(response, 'EXPENSE SAVE RESPONSE');
+            } catch (error) {
+                showServerJsonError(saveExpenseBtn, originalText);
+                return;
+            }
+
+            if (!data.success) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Could Not Save Expense',
+                    text: data.message || 'Something went wrong.',
+                    confirmButtonColor: '#00a651'
+                });
+
+                saveExpenseBtn.disabled = false;
+                saveExpenseBtn.innerHTML = originalText;
+                return;
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Expense Saved',
+                text: data.message,
+                timer: 1200,
+                showConfirmButton: false
+            });
+
+            setTimeout(function () {
+                window.location.reload();
+            }, 1200);
+
+        } catch (error) {
+            console.error('Expense save error:', error);
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Connection Error',
+                text: 'Could not connect to the local server.',
+                confirmButtonColor: '#00a651'
+            });
+
+            saveExpenseBtn.disabled = false;
+            saveExpenseBtn.innerHTML = originalText;
+        }
+    });
+}
 });

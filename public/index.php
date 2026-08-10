@@ -19,6 +19,7 @@ require_once __DIR__ . '/../app/controllers/PCStationController.php';
 require_once __DIR__ . '/../app/controllers/ReportController.php';
 require_once __DIR__ . '/../app/controllers/MemberController.php';
 require_once __DIR__ . '/../app/controllers/SettingsController.php';
+require_once __DIR__ . '/../app/controllers/ExpenseController.php';
 
 $route = $_GET['route'] ?? 'login';
 
@@ -34,6 +35,8 @@ $pcStationController = new PCStationController();
 $reportController = new ReportController();
 $memberController = new MemberController();
 $settingsController = new SettingsController();
+$expenseController = new ExpenseController();
+
 
 $publicRoutes = [
     'login',
@@ -158,6 +161,14 @@ switch ($route) {
     case 'settings':
         $settingsController->index();
         break;
+
+    case 'expenses':
+    $expenseController->index();
+    break;
+
+case 'expenses.store':
+    $expenseController->storeAjax();
+    break;
 
     default:
         header('Location: ' . BASE_URL . '/index.php?route=login');

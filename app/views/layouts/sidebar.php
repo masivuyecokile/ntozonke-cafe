@@ -78,6 +78,11 @@ function isActiveRoute(string $route, string $currentRoute): string
             Settings
         </a>
 
+        <a href="<?= BASE_URL; ?>/index.php?route=expenses" class="<?= isActiveRoute('expenses', $currentRoute); ?>">
+    <i class="bi bi-journal-minus"></i>
+    Expenses
+</a>
+
     </nav>
 
     <div class="sidebar-footer">
