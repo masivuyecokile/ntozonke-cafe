@@ -6,8 +6,7 @@ $csrfToken=$csrfToken??'';
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title><?=APP_NAME;
-?> | Login</title>
+        <title><?=APP_NAME;?> | Login</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -30,7 +29,7 @@ $csrfToken=$csrfToken??'';
                         <h1 class="mt-4">Internet Cafe Management</h1>
 
                         <p class="mt-3">
-                            Manage PC sessions, printing approvals, memberships, sales, and cafÃ© operations.
+                            Manage PC sessions, printing approvals, memberships, sales, and caf&eacute; operations.
                         </p>
 
                         <div class="login-feature-list mt-4">

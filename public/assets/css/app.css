@@ -1289,3 +1289,194 @@ a {
 .dashboard-pc-actions {
     padding-top: 4px;
 }
+
+
+/* =========================================================
+   LOGIN SCREEN FINAL FIX
+   Scoped only to login page so dashboard is not affected
+========================================================= */
+
+.login-body {
+    min-height: 100vh;
+    background: #f5f8f6;
+    display: block;
+    overflow: hidden;
+}
+
+.login-body .container-fluid {
+    min-height: 100vh;
+    padding: 0;
+}
+
+.login-body .row {
+    min-height: 100vh;
+}
+
+/* Left green panel */
+.login-body .login-brand-panel {
+    min-height: 100vh;
+    background:
+        linear-gradient(135deg, rgba(0, 166, 81, 0.94), rgba(5, 45, 28, 0.97)),
+        radial-gradient(circle at top left, rgba(255,255,255,0.16), transparent 38%);
+    color: #ffffff;
+    padding: 70px 55px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-body .brand-content {
+    width: 100%;
+    max-width: 520px;
+}
+
+/* Large logo on left panel */
+.login-body .login-logo-large {
+    display: block;
+    width: 220px;
+    max-width: 220px;
+    height: auto;
+    max-height: 140px;
+    object-fit: contain;
+    object-position: left center;
+    margin: 0 0 30px 0;
+}
+
+/* Left panel text */
+.login-body .login-brand-panel h1 {
+    font-size: 46px;
+    line-height: 1.08;
+    font-weight: 800;
+    margin-bottom: 18px;
+    color: #ffffff;
+}
+
+.login-body .login-brand-panel p {
+    color: rgba(255,255,255,0.88);
+    font-size: 15px;
+    line-height: 1.7;
+    max-width: 520px;
+}
+
+/* Feature list */
+.login-body .login-feature-list {
+    display: grid;
+    gap: 14px;
+}
+
+.login-body .login-feature-list div {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: rgba(255,255,255,0.95);
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.login-body .login-feature-list i {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.14);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+}
+
+/* Right login panel */
+.login-body .login-form-panel {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at top right, rgba(0,166,81,0.08), transparent 35%),
+        #f5f8f6;
+    padding: 50px 30px;
+}
+
+/* Login card */
+.login-body .login-card {
+    width: 100%;
+    max-width: 420px;
+    background: #ffffff;
+    border-radius: 28px;
+    padding: 42px;
+    box-shadow: 0 20px 70px rgba(0,0,0,0.08);
+}
+
+/* Small logo above form */
+.login-body img.login-logo {
+    display: block;
+    width: 115px;
+    max-width: 115px;
+    height: auto;
+    max-height: 90px;
+    object-fit: contain;
+    margin: 0 auto 18px;
+}
+
+/* Login title */
+.login-body .login-card h2 {
+    font-size: 30px;
+    line-height: 1.15;
+    font-weight: 800;
+    color: #101820;
+}
+
+.login-body .login-card p {
+    font-size: 14px;
+}
+
+/* Login form */
+.login-body .login-card .form-label {
+    font-weight: 600;
+    font-size: 14px;
+    color: #101820;
+}
+
+.login-body .login-card .form-control,
+.login-body .login-card .input-group-text {
+    min-height: 50px;
+    border-color: #dfe8e2;
+}
+
+.login-body .login-card .input-group-text {
+    background: #f4fbf6;
+    color: var(--brand-green-dark);
+}
+
+.login-body .login-btn {
+    min-height: 52px;
+    border-radius: 16px;
+    font-weight: 800;
+}
+
+.login-body .login-footer {
+    color: var(--brand-muted);
+    font-size: 13px;
+}
+
+/* Mobile login */
+@media (max-width: 991px) {
+    .login-body {
+        overflow-y: auto;
+    }
+
+    .login-body .login-form-panel {
+        min-height: 100vh;
+        padding: 28px 18px;
+    }
+
+    .login-body .login-card {
+        padding: 32px 24px;
+        border-radius: 24px;
+    }
+
+    .login-body img.login-logo {
+        width: 100px;
+        max-width: 100px;
+    }
+
+    .login-body .login-card h2 {
+        font-size: 26px;
+    }
+}
