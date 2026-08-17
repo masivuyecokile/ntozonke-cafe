@@ -14,3 +14,4 @@ __pycache__/
 *.pyc
 .formatter-tmp/
 node_modules/
+storage/logs
