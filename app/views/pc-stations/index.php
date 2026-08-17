@@ -117,6 +117,7 @@
         <?php foreach ($pcs as $pc): ?>
             <?php
                 $activeSession = $activeSessionsByPc[$pc->id] ?? null;
+                $connectionStatus = getClientConnectionStatus($pc->last_heartbeat ?? null);
 
                 $screenClass = $pc->status;
                 if ($pc->status === 'ending_soon') {
@@ -142,9 +143,15 @@
                     <div class="pc-card-header">
                         <h6><?= htmlspecialchars($pc->pc_name); ?></h6>
 
-                        <span class="badge <?= $statusBadge; ?>">
-                            <?= ucfirst(str_replace('_', ' ', $pc->status)); ?>
-                        </span>
+                        <div class="d-flex flex-column align-items-end gap-1">
+                            <span class="badge <?= $statusBadge; ?>">
+                                <?= ucfirst(str_replace('_', ' ', $pc->status)); ?>
+                            </span>
+
+                            <span class="badge <?= $connectionStatus['badge_class']; ?>">
+                                <?= htmlspecialchars($connectionStatus['label']); ?>
+                            </span>
+                        </div>
                     </div>
 
                     <div class="pc-card-body">
@@ -168,8 +175,10 @@
                             </div>
 
                             <div>
-                                <strong>Heartbeat:</strong>
-                                <?= $pc->last_heartbeat ? date('d M Y H:i', strtotime($pc->last_heartbeat)) : 'Never'; ?>
+                                <div>
+                                    <strong>Heartbeat:</strong>
+                                    <?= htmlspecialchars($connectionStatus['last_seen']); ?>
+                                </div>
                             </div>
                         </div>
 
