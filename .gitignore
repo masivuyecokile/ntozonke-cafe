@@ -12,4 +12,5 @@ python-client/client_identity.json
 python-client/logs/
 __pycache__/
 *.pyc
-.formatter-temp
+.formatter-tmp/
+node_modules/
