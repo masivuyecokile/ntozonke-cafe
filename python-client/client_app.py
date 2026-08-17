@@ -1,24 +1,67 @@
 import json
-import time
 import socket
 import urllib.parse
 import urllib.request
 import urllib.error
+import uuid
 import tkinter as tk
 from tkinter import simpledialog, messagebox
 from datetime import datetime
 from pathlib import Path
 
 
+BASE_DIR = Path(__file__).resolve().parent
+CONFIG_FILE = BASE_DIR / "config.json"
+IDENTITY_FILE = BASE_DIR / "client_identity.json"
+
+
 def load_config():
-    with open("config.json", "r", encoding="utf-8") as file:
+    with open(CONFIG_FILE, "r", encoding="utf-8") as file:
         return json.load(file)
+
+
+def load_json_file(path):
+    try:
+        if not path.exists():
+            return {}
+
+        with open(path, "r", encoding="utf-8") as file:
+            return json.load(file)
+    except Exception:
+        return {}
+
+
+def save_json_file(path, data):
+    with open(path, "w", encoding="utf-8") as file:
+        json.dump(data, file, indent=4)
 
 
 def get_local_ip():
     try:
-        hostname = socket.gethostname()
-        return socket.gethostbyname(hostname)
+        test_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        test_socket.connect(("8.8.8.8", 80))
+        ip_address = test_socket.getsockname()[0]
+        test_socket.close()
+        return ip_address
+    except Exception:
+        try:
+            hostname = socket.gethostname()
+            return socket.gethostbyname(hostname)
+        except Exception:
+            return ""
+
+
+def get_computer_name():
+    try:
+        return socket.gethostname()
+    except Exception:
+        return "UNKNOWN-PC"
+
+
+def get_mac_address():
+    try:
+        node = uuid.getnode()
+        return "-".join(f"{(node >> shift) & 0xff:02X}" for shift in range(40, -1, -8))
     except Exception:
         return ""
 
@@ -63,15 +106,25 @@ def format_remaining(seconds):
 class NtozonkeCafeClient:
     def __init__(self):
         self.config = load_config()
+        self.identity = load_json_file(IDENTITY_FILE)
 
         self.server_url = self.config["server_url"].rstrip("/")
         self.client_key = self.config["client_key"]
-        self.pc_id = self.config["pc_id"]
-        self.pc_name = self.config["pc_name"]
         self.poll_seconds = int(self.config.get("poll_seconds", 5))
-        self.admin_pin = str(self.config.get("admin_pin", "1234"))
+        self.admin_pin = str(self.config.get("admin_pin", "2026"))
         self.logo_path = self.config.get("logo_path", "")
         self.business_name = self.config.get("business_name", "Ntozonke Internet Cafe")
+
+        self.computer_name = self.config.get("computer_name", get_computer_name())
+        self.mac_address = self.config.get("mac_address", get_mac_address())
+
+        self.registration_token = self.identity.get("registration_token", "")
+        self.pc_id = self.identity.get("pc_id", self.config.get("pc_id", ""))
+        self.pc_name = self.identity.get(
+            "pc_name",
+            self.config.get("pc_name", self.computer_name or "Pending PC")
+        )
+        self.approval_status = self.identity.get("approval_status", "unknown")
 
         self.last_action = None
         self.current_session_id = None
@@ -198,6 +251,9 @@ class NtozonkeCafeClient:
 
             logo_file = Path(self.logo_path)
 
+            if not logo_file.is_absolute():
+                logo_file = BASE_DIR / logo_file
+
             if not logo_file.exists():
                 return
 
@@ -278,12 +334,125 @@ class NtozonkeCafeClient:
             "Content-Type": "application/x-www-form-urlencoded"
         }
 
-    def base_payload(self):
-        return {
-            "pc_id": str(self.pc_id),
-            "pc_name": self.pc_name,
-            "ip_address": get_local_ip()
+    def registration_payload(self):
+        payload = {
+            "computer_name": self.computer_name,
+            "ip_address": get_local_ip(),
+            "mac_address": self.mac_address
         }
+
+        if self.registration_token:
+            payload["registration_token"] = self.registration_token
+
+        return payload
+
+    def base_payload(self):
+        payload = {
+            "computer_name": self.computer_name,
+            "ip_address": get_local_ip(),
+            "mac_address": self.mac_address
+        }
+
+        if self.registration_token:
+            payload["registration_token"] = self.registration_token
+        elif self.pc_id:
+            payload["pc_id"] = str(self.pc_id)
+        elif self.pc_name:
+            payload["pc_name"] = self.pc_name
+
+        return payload
+
+    def register_client(self):
+        url = f"{self.server_url}/api/client/register"
+        response = post_form(url, self.headers(), self.registration_payload())
+
+        if response.get("success"):
+            self.update_identity_from_response(response)
+
+        return response
+
+    def ensure_registered(self):
+        if not self.registration_token:
+            return self.register_client()
+
+        return {
+            "success": True,
+            "approved": self.approval_status == "approved",
+            "approval_status": self.approval_status,
+            "action": "registered" if self.approval_status == "approved" else "pending_approval",
+            "should_lock": self.approval_status != "approved",
+            "pc": {
+                "id": self.pc_id,
+                "pc_name": self.pc_name,
+                "status": "locked",
+                "approval_status": self.approval_status
+            }
+        }
+
+    def update_identity_from_response(self, data):
+        pc = data.get("pc", {}) if isinstance(data, dict) else {}
+
+        token = (
+            data.get("registration_token")
+            or pc.get("client_token")
+            or self.registration_token
+        )
+
+        approval_status = (
+            data.get("approval_status")
+            or pc.get("approval_status")
+            or self.approval_status
+            or "unknown"
+        )
+
+        pc_id = pc.get("id", self.pc_id)
+        pc_name = pc.get("pc_name", self.pc_name)
+
+        if token:
+            self.registration_token = token
+
+        if pc_id:
+            self.pc_id = pc_id
+
+        if pc_name:
+            self.pc_name = pc_name
+
+        self.approval_status = approval_status
+
+        self.identity = {
+            "registration_token": self.registration_token,
+            "pc_id": self.pc_id,
+            "pc_name": self.pc_name,
+            "approval_status": self.approval_status,
+            "computer_name": pc.get("computer_name", self.computer_name),
+            "ip_address": pc.get("ip_address", get_local_ip()),
+            "mac_address": pc.get("mac_address", self.mac_address),
+            "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+
+        save_json_file(IDENTITY_FILE, self.identity)
+
+        if hasattr(self, "pc_label"):
+            self.pc_label.config(text=self.pc_name)
+
+        if hasattr(self, "session_title"):
+            self.session_title.config(text=f"{self.pc_name} ACTIVE SESSION")
+
+    def clear_identity(self):
+        self.identity = {}
+        self.registration_token = ""
+        self.pc_id = ""
+        self.pc_name = self.computer_name or "Pending PC"
+        self.approval_status = "unknown"
+
+        try:
+            if IDENTITY_FILE.exists():
+                IDENTITY_FILE.unlink()
+        except Exception:
+            pass
+
+        if hasattr(self, "pc_label"):
+            self.pc_label.config(text=self.pc_name)
 
     def send_heartbeat(self):
         url = f"{self.server_url}/api/client/heartbeat"
@@ -294,12 +463,25 @@ class NtozonkeCafeClient:
         return post_form(url, self.headers(), self.base_payload())
 
     def show_lock_screen(self, action, status_data=None):
+        if status_data:
+            self.update_identity_from_response(status_data)
+
         pc = status_data.get("pc", {}) if status_data else {}
         pc_status = pc.get("status", action)
+        approval_status = (
+            status_data.get("approval_status")
+            if status_data else self.approval_status
+        ) or pc.get("approval_status", self.approval_status)
 
         self.session_window.withdraw()
 
-        if pc_status == "maintenance":
+        if approval_status == "pending" or action == "pending_approval":
+            title = "WAITING FOR APPROVAL"
+            message = "This computer is waiting for admin approval from the front desk."
+        elif approval_status == "rejected" or action == "rejected":
+            title = "REGISTRATION REJECTED"
+            message = "This computer has not been approved for use."
+        elif pc_status == "maintenance":
             title = "MAINTENANCE"
             message = "This computer is currently under maintenance."
         elif pc_status == "offline":
@@ -313,8 +495,17 @@ class NtozonkeCafeClient:
         self.message_label.config(text=message)
 
         now = datetime.now().strftime("%H:%M:%S")
+        token_status = "Saved" if self.registration_token else "Not registered"
+
         self.info_label.config(
-            text=f"PC: {self.pc_name}\nStatus: {pc_status.upper()}\nLast check: {now}"
+            text=(
+                f"PC: {self.pc_name}\n"
+                f"Computer: {self.computer_name}\n"
+                f"Status: {str(pc_status).upper()}\n"
+                f"Approval: {str(approval_status).upper()}\n"
+                f"Identity: {token_status}\n"
+                f"Last check: {now}"
+            )
         )
 
         self.root.deiconify()
@@ -415,18 +606,49 @@ class NtozonkeCafeClient:
 
     def poll_server(self):
         try:
+            registration_status = self.ensure_registered()
+
+            if not registration_status.get("success"):
+                self.show_lock_screen("lock", registration_status)
+                self.info_label.config(
+                    text=f"Registration error:\n{registration_status.get('message', 'Unknown error')}"
+                )
+                self.schedule_next_poll()
+                return
+
+            if not registration_status.get("approved", False):
+                self.show_lock_screen(
+                    registration_status.get("action", "pending_approval"),
+                    registration_status
+                )
+                print(
+                    f"[{datetime.now().strftime('%H:%M:%S')}] "
+                    f"Registration: {registration_status.get('approval_status', 'pending')}"
+                )
+                self.schedule_next_poll()
+                return
+
             self.send_heartbeat()
             status = self.get_status()
+
+            if status.get("success"):
+                self.update_identity_from_response(status)
 
             if not status.get("success"):
                 self.show_lock_screen("lock", {
                     "pc": {
-                        "status": "locked"
+                        "status": "locked",
+                        "approval_status": self.approval_status
                     }
                 })
                 self.info_label.config(
                     text=f"Server error:\n{status.get('message', 'Unknown error')}"
                 )
+                self.schedule_next_poll()
+                return
+
+            if not status.get("approved", True):
+                self.show_lock_screen(status.get("action", "pending_approval"), status)
                 self.schedule_next_poll()
                 return
 
@@ -459,9 +681,25 @@ class NtozonkeCafeClient:
             except Exception:
                 body = str(error)
 
-            self.show_lock_screen("lock")
-            self.info_label.config(text=f"HTTP Error {error.code}\n{body}")
-            print(f"[{datetime.now().strftime('%H:%M:%S')}] HTTP Error: {error.code} - {body}")
+            message = body
+
+            try:
+                parsed = json.loads(body)
+                message = parsed.get("message", body)
+            except Exception:
+                pass
+
+            if error.code == 404 and "PC station not found" in message:
+                self.clear_identity()
+                self.show_lock_screen("lock")
+                self.info_label.config(
+                    text="PC identity was not found on the server.\nThe client will register again on the next check."
+                )
+            else:
+                self.show_lock_screen("lock")
+                self.info_label.config(text=f"HTTP Error {error.code}\n{message}")
+
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] HTTP Error: {error.code} - {message}")
 
         except Exception as error:
             self.show_lock_screen("lock")
@@ -477,8 +715,12 @@ class NtozonkeCafeClient:
         print("Ntozonke Cafe Client App")
         print("------------------------")
         print(f"Server: {self.server_url}")
-        print(f"PC ID: {self.pc_id}")
+        print(f"Computer: {self.computer_name}")
+        print(f"MAC: {self.mac_address}")
+        print(f"PC ID: {self.pc_id or 'Not assigned yet'}")
         print(f"PC Name: {self.pc_name}")
+        print(f"Approval: {self.approval_status}")
+        print(f"Identity file: {IDENTITY_FILE}")
         print("Admin exit: Ctrl + Shift + Q")
         print("")
 
