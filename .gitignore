@@ -14,4 +14,5 @@ __pycache__/
 *.pyc
 .formatter-tmp/
 node_modules/
-storage/logs
+storage/
+python-client/disable_watchdog.flag

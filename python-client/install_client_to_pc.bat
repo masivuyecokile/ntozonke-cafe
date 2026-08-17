@@ -11,8 +11,11 @@ if not exist "%INSTALL_DIR%" mkdir "%INSTALL_DIR%"
 if not exist "%INSTALL_DIR%\logs" mkdir "%INSTALL_DIR%\logs"
 
 copy /Y "%~dp0client_app.py" "%INSTALL_DIR%\client_app.py"
+copy /Y "%~dp0client_watchdog.py" "%INSTALL_DIR%\client_watchdog.py"
 copy /Y "%~dp0start_client_hidden.vbs" "%INSTALL_DIR%\start_client_hidden.vbs"
+copy /Y "%~dp0start_watchdog_hidden.vbs" "%INSTALL_DIR%\start_watchdog_hidden.vbs"
 copy /Y "%~dp0run_client_debug.bat" "%INSTALL_DIR%\run_client_debug.bat"
+copy /Y "%~dp0stop_client.bat" "%INSTALL_DIR%\stop_client.bat"
 
 if exist "%~dp0logo.png" (
     copy /Y "%~dp0logo.png" "%INSTALL_DIR%\logo.png"
@@ -24,15 +27,19 @@ if not exist "%INSTALL_DIR%\config.json" (
     echo Existing config.json found. Keeping it.
 )
 
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$WshShell = New-Object -ComObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut([Environment]::GetFolderPath('Startup') + '\Ntozonke Cafe Client.lnk'); $Shortcut.TargetPath = 'wscript.exe'; $Shortcut.Arguments = '""C:\NtozonkeClient\start_client_hidden.vbs""'; $Shortcut.WorkingDirectory = 'C:\NtozonkeClient'; $Shortcut.Save()"
+if exist "%INSTALL_DIR%\disable_watchdog.flag" (
+    del "%INSTALL_DIR%\disable_watchdog.flag"
+)
+
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$WshShell = New-Object -ComObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut([Environment]::GetFolderPath('Startup') + '\Ntozonke Cafe Client.lnk'); $Shortcut.TargetPath = 'wscript.exe'; $Shortcut.Arguments = '""C:\NtozonkeClient\start_watchdog_hidden.vbs""'; $Shortcut.WorkingDirectory = 'C:\NtozonkeClient'; $Shortcut.Save()"
 
 echo.
 echo Installation complete.
 echo Installed to: %INSTALL_DIR%
-echo Startup shortcut created.
+echo Startup watchdog shortcut created.
 echo.
-echo Run this to test now:
-echo C:\NtozonkeClient\run_client_debug.bat
+echo Test now:
+echo C:\NtozonkeClient\start_watchdog_hidden.vbs
 echo.
 
 pause
