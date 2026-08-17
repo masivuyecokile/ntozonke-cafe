@@ -18,3 +18,5 @@ storage/
 python-client/disable_watchdog.flag
 python-client/client.pid
 python-client/watchdog.pid
+python-client/config.json
+!python-client/config.example.json

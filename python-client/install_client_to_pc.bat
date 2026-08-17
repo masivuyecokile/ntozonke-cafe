@@ -16,6 +16,8 @@ copy /Y "%~dp0start_client_hidden.vbs" "%INSTALL_DIR%\start_client_hidden.vbs"
 copy /Y "%~dp0start_watchdog_hidden.vbs" "%INSTALL_DIR%\start_watchdog_hidden.vbs"
 copy /Y "%~dp0run_client_debug.bat" "%INSTALL_DIR%\run_client_debug.bat"
 copy /Y "%~dp0stop_client.bat" "%INSTALL_DIR%\stop_client.bat"
+copy /Y "%~dp0configure_client.bat" "%INSTALL_DIR%\configure_client.bat"
+copy /Y "%~dp0config.example.json" "%INSTALL_DIR%\config.example.json"
 
 if exist "%~dp0logo.png" (
     copy /Y "%~dp0logo.png" "%INSTALL_DIR%\logo.png"
@@ -25,6 +27,12 @@ if not exist "%INSTALL_DIR%\config.json" (
     copy /Y "%~dp0config.json" "%INSTALL_DIR%\config.json"
 ) else (
     echo Existing config.json found. Keeping it.
+)
+
+echo.
+set /p RUN_CONFIG=Do you want to configure this client now? (Y/N): 
+if /I "%RUN_CONFIG%"=="Y" (
+    call "%INSTALL_DIR%\configure_client.bat"
 )
 
 if exist "%INSTALL_DIR%\disable_watchdog.flag" (
