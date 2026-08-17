@@ -16,3 +16,5 @@ __pycache__/
 node_modules/
 storage/
 python-client/disable_watchdog.flag
+python-client/client.pid
+python-client/watchdog.pid
