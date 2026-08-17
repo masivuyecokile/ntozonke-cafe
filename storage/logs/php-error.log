@@ -1,3 +1,0 @@
-[10-Aug-2026 18:55:11 Africa/Johannesburg] LOGIN ERROR: SQLSTATE[HY000] [2002] php_network_getaddresses: getaddrinfo for  {
-                localhost
-            } failed: No such host is known.  in C:\xampp\htdocs\ntozonke-cafe\app\config\database.php on line 15
