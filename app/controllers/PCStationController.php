@@ -1,8 +1,5 @@
 <?php
 
-require_once __DIR__ . '/../models/PC.php';
-require_once __DIR__ . '/../models/CafeSession.php';
-
 class PCStationController
 {
     public function index(): void
@@ -10,7 +7,8 @@ class PCStationController
         $pcModel = new PC();
         $sessionModel = new CafeSession();
 
-        $pcs = $pcModel->getAll();
+        $pcs = $pcModel->getApproved();
+        $pendingPcs = $pcModel->getPending();
         $activeSessionsByPc = $sessionModel->getActiveSessionsIndexedByPc();
 
         $csrfToken = $_SESSION['csrf_token'] ?? bin2hex(random_bytes(32));
@@ -30,6 +28,7 @@ class PCStationController
         $pcName = trim($_POST['pc_name'] ?? '');
         $ipAddress = trim($_POST['ip_address'] ?? '');
         $macAddress = trim($_POST['mac_address'] ?? '');
+        $computerName = trim($_POST['computer_name'] ?? '');
         $status = $_POST['status'] ?? 'locked';
 
         if ($pcName === '') {
@@ -45,6 +44,7 @@ class PCStationController
 
             $pcId = $pcModel->create([
                 'pc_name' => $pcName,
+                'computer_name' => $computerName,
                 'ip_address' => $ipAddress,
                 'mac_address' => $macAddress,
                 'status' => $status
@@ -71,6 +71,7 @@ class PCStationController
         $pcName = trim($_POST['pc_name'] ?? '');
         $ipAddress = trim($_POST['ip_address'] ?? '');
         $macAddress = trim($_POST['mac_address'] ?? '');
+        $computerName = trim($_POST['computer_name'] ?? '');
 
         if ($pcId <= 0) {
             jsonResponse(false, 'Invalid PC station.', [], 422);
@@ -90,11 +91,79 @@ class PCStationController
 
             $pcModel->update($pcId, [
                 'pc_name' => $pcName,
+                'computer_name' => $computerName,
                 'ip_address' => $ipAddress,
                 'mac_address' => $macAddress
             ]);
 
             jsonResponse(true, 'PC station updated successfully.');
+
+        } catch (Throwable $e) {
+            jsonResponse(false, $e->getMessage(), [], 500);
+        }
+    }
+
+    public function approveAjax(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            jsonResponse(false, 'Invalid request method.', [], 405);
+        }
+
+        $this->checkCsrf();
+
+        $pcId = (int)($_POST['pc_id'] ?? 0);
+        $pcName = trim($_POST['pc_name'] ?? '');
+
+        if ($pcId <= 0) {
+            jsonResponse(false, 'Invalid PC station.', [], 422);
+        }
+
+        if ($pcName === '') {
+            jsonResponse(false, 'Approved PC name is required.', [], 422);
+        }
+
+        try {
+            $pcModel = new PC();
+            $pc = $pcModel->findById($pcId);
+
+            if (!$pc) {
+                jsonResponse(false, 'PC station not found.', [], 404);
+            }
+
+            $pcModel->approveClient($pcId, $pcName);
+
+            jsonResponse(true, 'PC approved successfully.');
+
+        } catch (Throwable $e) {
+            jsonResponse(false, $e->getMessage(), [], 500);
+        }
+    }
+
+    public function rejectAjax(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            jsonResponse(false, 'Invalid request method.', [], 405);
+        }
+
+        $this->checkCsrf();
+
+        $pcId = (int)($_POST['pc_id'] ?? 0);
+
+        if ($pcId <= 0) {
+            jsonResponse(false, 'Invalid PC station.', [], 422);
+        }
+
+        try {
+            $pcModel = new PC();
+            $pc = $pcModel->findById($pcId);
+
+            if (!$pc) {
+                jsonResponse(false, 'PC station not found.', [], 404);
+            }
+
+            $pcModel->rejectClient($pcId);
+
+            jsonResponse(true, 'PC registration rejected.');
 
         } catch (Throwable $e) {
             jsonResponse(false, $e->getMessage(), [], 500);

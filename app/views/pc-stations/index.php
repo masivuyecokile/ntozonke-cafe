@@ -21,7 +21,93 @@
             </a>
         </div>
     </div>
+    <?php if (!empty($pendingPcs)): ?>
+    <div class="section-heading mt-4">
+        <h5>Pending PC Approvals</h5>
+        <p>New computers that installed the client and are waiting for admin approval.</p>
+    </div>
 
+    <div class="row g-3 mt-1 mb-4">
+        <?php foreach ($pendingPcs as $pendingPc): ?>
+            <div class="col-xl-4 col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+
+                        <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                            <div>
+                                <h6 class="fw-bold mb-1">
+                                    <?= htmlspecialchars($pendingPc->computer_name ?: 'Unknown Computer'); ?>
+                                </h6>
+                                <small class="text-muted">
+                                    Waiting for approval
+                                </small>
+                            </div>
+
+                            <span class="badge bg-warning text-dark">
+                                Pending
+                            </span>
+                        </div>
+
+                        <div class="pc-meta mb-3">
+                            <div>
+                                <strong>Temporary Name:</strong>
+                                <?= htmlspecialchars($pendingPc->pc_name); ?>
+                            </div>
+
+                            <div>
+                                <strong>IP:</strong>
+                                <?= htmlspecialchars($pendingPc->ip_address ?? 'Not set'); ?>
+                            </div>
+
+                            <div>
+                                <strong>MAC:</strong>
+                                <?= htmlspecialchars($pendingPc->mac_address ?? 'Not set'); ?>
+                            </div>
+
+                            <div>
+                                <strong>Registered:</strong>
+                                <?= $pendingPc->registered_at ? date('d M Y H:i', strtotime($pendingPc->registered_at)) : 'Unknown'; ?>
+                            </div>
+                        </div>
+
+                        <form class="js-approve-pc-form" action="<?= BASE_URL; ?>/index.php?route=pc-stations.approve" method="POST">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken); ?>">
+                            <input type="hidden" name="pc_id" value="<?= (int)$pendingPc->id; ?>">
+
+                            <label class="form-label small fw-semibold">Approve as</label>
+
+                            <div class="input-group mb-2">
+                                <input
+                                    type="text"
+                                    name="pc_name"
+                                    class="form-control"
+                                    value="PC <?= (int)$pendingPc->id; ?>"
+                                    placeholder="Example: PC 5"
+                                    required>
+
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    Approve
+                                </button>
+                            </div>
+                        </form>
+
+                        <button
+                            type="button"
+                            class="btn btn-outline-danger btn-sm w-100 js-reject-pc"
+                            data-url="<?= BASE_URL; ?>/index.php?route=pc-stations.reject"
+                            data-pc-id="<?= (int)$pendingPc->id; ?>"
+                            data-csrf-token="<?= htmlspecialchars($csrfToken); ?>">
+                            <i class="bi bi-x-circle me-1"></i>
+                            Reject This PC
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>
     <div class="section-heading mt-4">
         <h5>Registered PC Stations</h5>
         <p>Manage all computers connected to the café system.</p>
@@ -298,6 +384,107 @@
         baseUrl: "<?= BASE_URL; ?>",
         csrfToken: "<?= htmlspecialchars($csrfToken); ?>"
     };
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    async function parseJsonResponse(response) {
+        const text = await response.text();
+        const cleanText = text.replace(/^\uFEFF/, '').trim();
+
+        try {
+            return JSON.parse(cleanText);
+        } catch (error) {
+            return {
+                success: false,
+                message: cleanText || 'Invalid server response.'
+            };
+        }
+    }
+
+    function showMessage(success, message) {
+        if (window.Swal) {
+            Swal.fire({
+                icon: success ? 'success' : 'error',
+                title: success ? 'Done' : 'Error',
+                text: message
+            }).then(function () {
+                if (success) {
+                    window.location.reload();
+                }
+            });
+        } else {
+            alert(message);
+            if (success) {
+                window.location.reload();
+            }
+        }
+    }
+
+    document.querySelectorAll('.js-approve-pc-form').forEach(function (form) {
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalText = submitButton.innerHTML;
+
+            submitButton.disabled = true;
+            submitButton.innerHTML = 'Approving...';
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form)
+                });
+
+                const data = await parseJsonResponse(response);
+                showMessage(data.success, data.message);
+            } catch (error) {
+                showMessage(false, 'Could not approve PC. Please try again.');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalText;
+            }
+        });
+    });
+
+    document.querySelectorAll('.js-reject-pc').forEach(function (button) {
+        button.addEventListener('click', async function () {
+            const confirmed = window.Swal
+                ? await Swal.fire({
+                    icon: 'warning',
+                    title: 'Reject this PC?',
+                    text: 'This computer will not be allowed to use the café client.',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, reject it',
+                    cancelButtonText: 'Cancel'
+                })
+                : { isConfirmed: confirm('Reject this PC?') };
+
+            if (!confirmed.isConfirmed) {
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('csrf_token', button.dataset.csrfToken);
+            formData.append('pc_id', button.dataset.pcId);
+
+            button.disabled = true;
+            button.innerHTML = 'Rejecting...';
+
+            try {
+                const response = await fetch(button.dataset.url, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await parseJsonResponse(response);
+                showMessage(data.success, data.message);
+            } catch (error) {
+                showMessage(false, 'Could not reject PC. Please try again.');
+            }
+        });
+    });
+});
 </script>
 
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

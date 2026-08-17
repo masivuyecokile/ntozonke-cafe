@@ -1,5 +1,6 @@
 RewriteEngine On
 
+RewriteRule ^api/client/register/?$ index.php?route=client.register [QSA,L]
 RewriteRule ^api/client/heartbeat/?$ index.php?route=client.heartbeat [QSA,L]
 RewriteRule ^api/client/status/?$ index.php?route=client.status [QSA,L]
 RewriteRule ^api/client/session/?$ index.php?route=client.session [QSA,L]

@@ -11,6 +11,7 @@ $publicRoutes = [
     'login',
     'auth.login',
     'client.heartbeat',
+    'client.register',
     'client.status',
     'client.session',
     'client.print-job'
@@ -41,6 +42,8 @@ $routes = [
     'pc-stations.store' => [PCStationController::class, 'storeAjax'],
     'pc-stations.update' => [PCStationController::class, 'updateAjax'],
     'pc-stations.status' => [PCStationController::class, 'statusAjax'],
+    'pc-stations.approve' => [PCStationController::class, 'approveAjax'],
+    'pc-stations.reject' => [PCStationController::class, 'rejectAjax'],
 
     /*
      * Sessions
@@ -113,7 +116,8 @@ $routes = [
     'client.heartbeat' => [ClientApiController::class, 'heartbeat'],
     'client.status' => [ClientApiController::class, 'status'],
     'client.session' => [ClientApiController::class, 'session'],
-    'client.print-job' => [ClientApiController::class, 'printJob']
+    'client.print-job' => [ClientApiController::class, 'printJob'],
+    'client.register' => [ClientApiController::class, 'register'],
 ];
 
 if (!isset($routes[$route])) {
