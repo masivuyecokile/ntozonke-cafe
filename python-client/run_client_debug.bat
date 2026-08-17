@@ -1,8 +1,12 @@
 @echo off
-cd /d C:\xampp\htdocs\ntozonke-cafe\python-client
+cd /d "%~dp0"
 
-echo Starting Ntozonke Cafe Client...
-echo Press Ctrl + C to stop if running in debug mode.
+echo Ntozonke Cafe Client Debug Mode
+echo --------------------------------
+echo Folder: %cd%
+echo.
+echo Press Ctrl + C to stop from this window.
+echo Admin exit inside client: Ctrl + Shift + Q
 echo.
 
 python client_app.py

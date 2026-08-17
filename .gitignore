@@ -8,3 +8,8 @@ secrets/
 private/
 .vscode/launch.json
 logs
+python-client/client_identity.json
+python-client/logs/
+__pycache__/
+*.pyc
+.formatter-temp
